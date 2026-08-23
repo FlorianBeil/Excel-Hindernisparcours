@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel Hindernisparkour – Excel.Flo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=16">
+</head>
+<body>
+
+<header class="top-bar">
+  <img src="logo-dark.svg" alt="" class="top-bar-logo">
+  <span class="top-bar-brand">Excel.Flo</span>
+</header>
+
+<!-- Touch-only Hinweisbildschirm -->
+<section id="screen-touch" class="screen">
+  <div class="card center">
+    <div class="big-icon">⌨️</div>
+    <h1>Nur am Desktop verfügbar</h1>
+    <p>Diese Challenge funktioniert nur am Desktop oder Laptop mit einer physischen Tastatur – Excel-Shortcuts lassen sich auf einem Touch-Gerät nicht ausführen.</p>
+    <p class="muted">Ruf diese Seite auf einem Computer erneut auf, um den Parkour zu starten.</p>
+  </div>
+</section>
+
+<!-- Startbildschirm -->
+<section id="screen-start" class="screen">
+  <div class="start-container">
+    <div class="start-logo-row">
+      <img src="logo-dark.svg" alt="" class="start-logo">
+      <span class="start-wordmark">Excel.Flo</span>
+    </div>
+
+    <div class="start-hero">
+      <div class="start-eyebrow">SPEEDRUN &middot; NUR TASTATUR</div>
+      <h1 class="start-title">Excel <span class="accent">Hindernisparcours</span></h1>
+      <p class="start-subline">7 Aufgaben. Ein Timer. Keine Maus. Jede H&uuml;rde l&ouml;st du mit einem Excel-Shortcut - so schnell du kannst.</p>
+      <div class="start-cta-row">
+        <button id="btn-start" type="button" class="btn-cta">CHALLENGE STARTEN</button>
+        <span class="start-cta-hint">oder <span class="keycap">Enter</span> dr&uuml;cken</span>
+      </div>
+    </div>
+
+    <div class="start-stats">
+      <div class="start-stats-cell">
+        <div class="start-stats-value">7</div>
+        <div class="start-stats-label">H&Uuml;RDEN</div>
+      </div>
+      <div class="start-stats-cell">
+        <div class="start-stats-value">1:12</div>
+        <div class="start-stats-label">BESTZEIT</div>
+      </div>
+      <div class="start-stats-cell">
+        <div class="start-stats-value">100+</div>
+        <div class="start-stats-label">TEILNEHMER</div>
+      </div>
+      <div class="start-stats-cell start-stats-mod">
+        <span class="keycap">Strg</span>
+        <span class="start-mod-sep">/</span>
+        <span class="keycap">Cmd</span>
+        <span class="start-mod-text">automatisch erkannt</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Challenge-Bildschirm -->
+<section id="screen-challenge" class="screen">
+  <div class="task-container">
+    <div class="task-logo-row">
+      <img src="logo-dark.svg" alt="" class="task-logo">
+      <span class="task-wordmark">Excel.Flo</span>
+    </div>
+
+    <div class="task-content">
+      <div class="task-frame" id="task-frame">
+        <div class="task-hud">
+          <div class="task-hud-left">
+            <span class="task-hud-label" id="progress-label">Aufgabe 1/7</span>
+            <div class="task-pips" id="task-pips"></div>
+          </div>
+          <button id="btn-reset" class="task-reset-btn" type="button" title="Zur&uuml;ck zum Start">&#8634; Neu starten</button>
+        </div>
+
+        <div class="task-row">
+          <span class="task-instruction" id="task-instruction">Anweisung</span>
+          <div class="task-timer"><span id="timer-display">0.00</span><span class="task-timer-unit">s</span></div>
+        </div>
+
+        <div class="grid-window">
+          <div class="ribbon" id="ribbon-container"></div>
+          <div class="formula-bar">
+            <div class="namebox" id="namebox">A1</div>
+            <div class="formulabar" id="formulabar"><span id="formulabar-text"></span></div>
+          </div>
+          <div class="grid-scroll">
+            <div id="grid-container"></div>
+          </div>
+        </div>
+
+        <div class="task-badges" id="task-badges"></div>
+        <div class="task-hint" id="task-hint"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-layer" id="feedback-layer">
+    <div class="success-check" id="success-check">✓</div>
+    <div class="wrong-toast" id="wrong-toast">Falscher Shortcut, versuch's nochmal</div>
+  </div>
+</section>
+
+<!-- Ergebnisbildschirm -->
+<section id="screen-result" class="screen">
+  <div id="confetti-layer"></div>
+  <div class="result-container">
+    <div class="result-logo-row">
+      <img src="logo-dark.svg" alt="" class="task-logo">
+      <span class="task-wordmark">Excel.Flo</span>
+    </div>
+    <div class="result-content">
+      <div class="card center">
+        <h1 id="result-headline">Geschafft!</h1>
+        <div class="result-time" id="result-time">0.0s</div>
+        <div class="result-compare" id="result-compare"></div>
+
+        <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
+
+        <div class="cta-box">
+          <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="app.js?v=22"></script>
+</body>
+</html>
