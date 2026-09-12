@@ -241,7 +241,7 @@
   }
 
   function buildGridHTML(ctx) {
-    const { cols, rows, data, activeCell, colSelected, rowSelected, headerFilterRow, styledRange, columnColors, rowColors, zone, orangeGrid, cutRect, selAnchor, wideCols, cellClass, cellStyle, colWidth, minVisualCols, minVisualRows } = ctx;
+    const { cols, rows, data, activeCell, colSelected, rowSelected, headerFilterRow, styledRange, columnColors, rowColors, zoneGrid, orangeGrid, cutRect, selAnchor, wideCols, cellClass, cellStyle, colWidth, minVisualCols, minVisualRows } = ctx;
     // Bei Aufgaben mit Umschalt+Pfeiltasten-Markierung (selAnchor gesetzt) wird die aktuelle Markierung
     // aus Anker- und aktiver Zelle live berechnet, statt sie separat im State mitzuführen. Bei einer
     // reinen 1-Zellen-"Markierung" (kein Umschalt genutzt) wird nichts zusätzlich hervorgehoben –
@@ -285,7 +285,7 @@
         }
         if (orangeGrid && orangeGrid[r] && orangeGrid[r][c]) {
           classes.push("piece-orange");
-        } else if (zone && inRange(r, c, zone)) {
+        } else if (zoneGrid && zoneGrid[r] && zoneGrid[r][c]) {
           classes.push("zone-green");
         }
         if (cutRect && inRange(r, c, cutRect)) classes.push("piece-cut");
@@ -598,7 +598,7 @@
         let remaining = 0;
         ctx.orangeGrid.forEach((row, r) => {
           row.forEach((isOrange, c) => {
-            if (isOrange && !inRange(r, c, ctx.zone)) remaining++;
+            if (isOrange && !ctx.zoneGrid[r][c]) remaining++;
           });
         });
         return `Markiere mit Umschalt+Pfeiltasten genau den Bereich, den du verschieben willst (auch einzelne Zellen gehen). Noch ${remaining} orangene Zellen außerhalb des grünen Bereichs.`;
@@ -607,25 +607,33 @@
         const cols = 6, rows = 10;
         const data = [];
         for (let r = 0; r < rows; r++) data.push(new Array(cols).fill(""));
-        // r1/c1 sind exklusiv. B2:B4, D2:F4 (0-indexiert: A=0, B=1, C=2, D=3, E=4, F=5)
-        const ranges = [
-          { r0: 1, r1: 4, c0: 1, c1: 2 },
-          { r0: 1, r1: 4, c0: 3, c1: 6 },
+        // r1/c1 sind exklusiv (0-indexiert: A=0, B=1, C=2, D=3, E=4, F=5).
+        // Quelle: ein einzelnes Rechteck B2:E4. Ziel: zweigeteilt B6:B8 + D6:F8
+        // (Lücke bei Spalte C) - beide Seiten ergeben 12 Zellen, geht also exakt auf.
+        const orangeRanges = [{ r0: 1, r1: 4, c0: 1, c1: 5 }]; // B2:E4
+        const zoneRanges = [
+          { r0: 5, r1: 8, c0: 1, c1: 2 }, // B6:B8
+          { r0: 5, r1: 8, c0: 3, c1: 6 }, // D6:F8
         ];
         const orangeGrid = Array.from({ length: rows }, () => new Array(cols).fill(false));
-        ranges.forEach((rng) => {
+        orangeRanges.forEach((rng) => {
           for (let r = rng.r0; r < rng.r1; r++) {
             for (let c = rng.c0; c < rng.c1; c++) orangeGrid[r][c] = true;
           }
         });
-        const zone = { r0: 5, r1: 8, c0: 1, c1: 5 }; // B6:E8
+        const zoneGrid = Array.from({ length: rows }, () => new Array(cols).fill(false));
+        zoneRanges.forEach((rng) => {
+          for (let r = rng.r0; r < rng.r1; r++) {
+            for (let c = rng.c0; c < rng.c1; c++) zoneGrid[r][c] = true;
+          }
+        });
         return {
           cols, rows, data,
           activeCell: { r: 0, c: 0 },
           selAnchor: { r: 0, c: 0 },
           colSelected: null, rowSelected: null,
           headerFilterRow: null, styledRange: null,
-          orangeGrid, zone,
+          orangeGrid, zoneGrid,
           cutRect: null,
           cutPattern: null,
           // Eine weitere leere Spalte rechts neben F, damit das Blatt nicht am Rand endet.
@@ -680,12 +688,18 @@
           const h = rect.r1 - rect.r0, w = rect.c1 - rect.c0;
           const tR0 = ctx.activeCell.r, tC0 = ctx.activeCell.c;
           const tR1 = tR0 + h, tC1 = tC0 + w;
-          const withinZone = tR0 >= ctx.zone.r0 && tR1 <= ctx.zone.r1 && tC0 >= ctx.zone.c0 && tC1 <= ctx.zone.c1;
+          // Ziel ist zweigeteilt (kein einzelnes Rechteck mehr) - deshalb pro Zelle
+          // gegen zoneGrid prüfen statt gegen eine einzelne Rechteck-Grenze.
+          const inBounds = tR0 >= 0 && tC0 >= 0 && tR1 <= ctx.rows && tC1 <= ctx.cols;
+          let withinZone = inBounds;
           let overlap = false;
-          for (let r = tR0; r < tR1 && !overlap; r++) {
-            for (let c = tC0; c < tC1 && !overlap; c++) {
-              const insideSource = r >= rect.r0 && r < rect.r1 && c >= rect.c0 && c < rect.c1;
-              if (!insideSource && ctx.orangeGrid[r][c]) overlap = true;
+          if (inBounds) {
+            for (let r = tR0; r < tR1; r++) {
+              for (let c = tC0; c < tC1; c++) {
+                if (!ctx.zoneGrid[r][c]) withinZone = false;
+                const insideSource = r >= rect.r0 && r < rect.r1 && c >= rect.c0 && c < rect.c1;
+                if (!insideSource && ctx.orangeGrid[r][c]) overlap = true;
+              }
             }
           }
           if (!withinZone || overlap) {
@@ -708,7 +722,7 @@
           ctx.selAnchor = { r: tR0, c: tC0 };
 
           const remainingOutside = ctx.orangeGrid.some((row, r) =>
-            row.some((isOrange, c) => isOrange && !inRange(r, c, ctx.zone))
+            row.some((isOrange, c) => isOrange && !ctx.zoneGrid[r][c])
           );
           if (!remainingOutside) {
             handleSuccess();
