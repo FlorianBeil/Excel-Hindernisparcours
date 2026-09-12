@@ -1045,6 +1045,12 @@ table.sheet td.cell.range-border {
   border-top: 1px solid var(--color-card-border);
 }
 
+.guide-subtext {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--color-body);
+}
+
 @media (max-width: 640px) {
   .card { padding: 28px 22px; }
   h1 { font-size: 22px; }
