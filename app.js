@@ -1384,7 +1384,8 @@
     resultTimeEl.textContent = finalSeconds.toFixed(1) + "s";
     const diff = Math.abs(finalSeconds - REFERENCE_TIME_SECONDS).toFixed(1);
     const refLabel = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
-    if (finalSeconds < REFERENCE_TIME_SECONDS) {
+    const beatReference = finalSeconds < REFERENCE_TIME_SECONDS;
+    if (beatReference) {
       resultHeadlineEl.textContent = "Stark gemacht!";
       resultCompareEl.textContent = `🏆 ${diff}s schneller als Flos Referenzzeit (${refLabel})`;
       resultCompareEl.className = "result-compare faster";
@@ -1394,7 +1395,9 @@
       resultCompareEl.className = "result-compare slower";
     }
     showScreen("result");
-    spawnConfetti();
+    // Konfetti ist die besondere Belohnung dafür, Flos Referenzzeit geschlagen zu
+    // haben - nicht für jeden Abschluss, sonst verliert es seine Bedeutung.
+    if (beatReference) spawnConfetti();
 
     recordRun(finalSeconds)
       .then((stats) => {
