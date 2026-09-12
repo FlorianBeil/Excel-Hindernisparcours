@@ -1396,8 +1396,15 @@
     }
     showScreen("result");
     // Konfetti ist die besondere Belohnung dafür, Flos Referenzzeit geschlagen zu
-    // haben - nicht für jeden Abschluss, sonst verliert es seine Bedeutung.
-    if (beatReference) spawnConfetti();
+    // haben (sofort bekannt) oder unter den Top 10 der Teilnehmer zu landen (erst
+    // nach der Rang-Abfrage bekannt) - nicht für jeden Abschluss, sonst verliert
+    // es seine Bedeutung. confettiFired verhindert ein doppeltes Auslösen, falls
+    // beides zutrifft.
+    let confettiFired = false;
+    if (beatReference) {
+      spawnConfetti();
+      confettiFired = true;
+    }
 
     recordRun(finalSeconds)
       .then((stats) => {
@@ -1415,6 +1422,7 @@
           const behind = (mySeconds - bestSeconds).toFixed(1);
           rankResultEl.innerHTML = `${behind}s hinter der Bestzeit (${bestSeconds.toFixed(1)}s) · Platz <span class="rank-number">${stats.rank}</span> von ${stats.total} Teilnehmern`;
         }
+        if (!confettiFired && stats.rank <= 10) spawnConfetti();
       })
       .catch(() => {}); // best effort, keine Rang-Anzeige statt Fehlermeldung
   }
