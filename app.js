@@ -7,6 +7,64 @@
   const REFERENCE_TIME_SECONDS = 28.0;
 
   /* ---------------------------------------------------------------
+   * Ranking (Supabase, dasselbe Projekt wie das Übungsportal) – ein Lauf
+   * landet nur in der Datenbank, wenn der Spieler sich freiwillig mit
+   * Vorname + E-Mail zum Vergleich anmeldet (kein automatisches Tracking).
+   * Weder die Bestzeit- noch die Rang-Abfrage lesen die Tabelle direkt –
+   * beides läuft über RPC-Funktionen, die nur aggregierte Zahlen liefern,
+   * nie die Namen/E-Mails anderer Teilnehmer (siehe hindernisparkour_runs.sql).
+   * Alles best effort: schlägt die Verbindung fehl, bleibt einfach der
+   * lokale Platzhalter "–" stehen bzw. eine Fehlermeldung im Formular.
+   * ------------------------------------------------------------- */
+  const SUPABASE_URL = "https://hbhagmmbowplzjzfvuao.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_Ee47HbgO5Ne8PP9Jh5ugag_iE_lZcp6";
+  const RUNS_TABLE = "hindernisparkour_runs";
+
+  let supabaseClient = null;
+  function getSupabaseClient() {
+    if (!window.supabase || !window.supabase.createClient) return null; // SDK nicht geladen (z.B. offline/geblockt)
+    if (!supabaseClient) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return supabaseClient;
+  }
+
+  function fmtBestTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds - m * 60;
+    return m > 0 ? `${m}:${s.toFixed(0).padStart(2, "0")}` : `${seconds.toFixed(1)}s`;
+  }
+
+  function loadBestTime() {
+    const client = getSupabaseClient();
+    if (!client) return;
+    client
+      .rpc("hindernisparkour_best_time")
+      .then(({ data, error }) => {
+        if (error || data == null) return;
+        startBestTimeEl.textContent = fmtBestTime(Number(data));
+      })
+      .catch(() => {}); // best effort, Platzhalter "–" bleibt stehen
+  }
+
+  // Trägt den Lauf (Name, E-Mail, Zeit) ein und liefert den Rang zurück –
+  // wird nur beim freiwilligen Absenden des Vergleichs-Formulars aufgerufen.
+  function submitRankEntry(firstName, email, seconds) {
+    const client = getSupabaseClient();
+    if (!client) return Promise.reject(new Error("Supabase nicht verfügbar"));
+    return client
+      .from(RUNS_TABLE)
+      .insert({ first_name: firstName, email: email, seconds: seconds })
+      .then(({ error }) => {
+        if (error) throw error;
+        return client.rpc("hindernisparkour_rank", { p_seconds: seconds });
+      })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        loadBestTime(); // Startseiten-Bestzeit könnte sich gerade geändert haben
+        return data && data[0] ? data[0] : null;
+      });
+  }
+
+  /* ---------------------------------------------------------------
    * Plattform-Erkennung: Strg (Windows) vs. Cmd (Mac)
    * ------------------------------------------------------------- */
   const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform || "") ||
@@ -1175,6 +1233,13 @@
   const btnRetry = document.getElementById("btn-retry");
   const btnReset = document.getElementById("btn-reset");
   const topBarEl = document.querySelector(".top-bar");
+  const startBestTimeEl = document.getElementById("start-best-time");
+  const btnRankToggle = document.getElementById("btn-rank-toggle");
+  const rankFormEl = document.getElementById("rank-form");
+  const rankNameEl = document.getElementById("rank-name");
+  const rankEmailEl = document.getElementById("rank-email");
+  const rankHintEl = document.getElementById("rank-hint");
+  const rankResultEl = document.getElementById("rank-result");
 
   function showScreen(name) {
     Object.entries(screens).forEach(([key, el]) => {
@@ -1194,6 +1259,7 @@
   let timerStartMs = 0;
   let timerInterval = null;
   let wrongToastTimer = null;
+  let currentResultSeconds = null;
 
   function renderCurrentTask() {
     const task = TASKS[currentTaskIndex];
@@ -1290,6 +1356,8 @@
   }
 
   function showResultScreen(finalSeconds) {
+    currentResultSeconds = finalSeconds;
+    resetRankBox();
     resultTimeEl.textContent = finalSeconds.toFixed(1) + "s";
     const diff = Math.abs(finalSeconds - REFERENCE_TIME_SECONDS).toFixed(1);
     const refLabel = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
@@ -1393,6 +1461,49 @@
   btnRetry.addEventListener("click", backToStart);
   btnReset.addEventListener("click", backToStart);
 
+  function resetRankBox() {
+    btnRankToggle.hidden = false;
+    rankFormEl.hidden = true;
+    rankFormEl.reset();
+    rankHintEl.hidden = true;
+    rankHintEl.textContent = "";
+    rankResultEl.hidden = true;
+    rankResultEl.innerHTML = "";
+    rankFormEl.querySelector(".rank-submit").disabled = false;
+  }
+
+  btnRankToggle.addEventListener("click", () => {
+    btnRankToggle.hidden = true;
+    rankFormEl.hidden = false;
+    rankNameEl.focus();
+  });
+
+  rankFormEl.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const firstName = rankNameEl.value.trim();
+    const email = rankEmailEl.value.trim();
+    if (!firstName || !email || currentResultSeconds == null) return;
+    const submitBtn = rankFormEl.querySelector(".rank-submit");
+    submitBtn.disabled = true;
+    rankHintEl.hidden = false;
+    rankHintEl.textContent = "Wird eingetragen …";
+    submitRankEntry(firstName, email, currentResultSeconds)
+      .then((result) => {
+        rankFormEl.hidden = true;
+        rankHintEl.hidden = true;
+        rankResultEl.hidden = false;
+        if (result) {
+          rankResultEl.innerHTML = `🏆 Platz <span class="rank-number">${result.rank}</span> von ${result.total} Teilnehmern`;
+        } else {
+          rankResultEl.textContent = "Eingetragen! Dein Rang konnte gerade nicht ermittelt werden.";
+        }
+      })
+      .catch(() => {
+        submitBtn.disabled = false;
+        rankHintEl.textContent = "Das hat leider nicht geklappt – versuch's gleich nochmal.";
+      });
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && screens.start.classList.contains("active")) {
       startChallenge();
@@ -1402,6 +1513,7 @@
   /* ---------------------------------------------------------------
    * Init
    * ------------------------------------------------------------- */
+  loadBestTime();
 
   if (isTouchOnlyDevice()) {
     showScreen("touch");

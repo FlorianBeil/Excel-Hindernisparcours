@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -50,7 +51,7 @@
         <div class="start-stats-label">H&Uuml;RDEN</div>
       </div>
       <div class="start-stats-cell">
-        <div class="start-stats-value">1:12</div>
+        <div class="start-stats-value" id="start-best-time">&ndash;</div>
         <div class="start-stats-label">BESTZEIT</div>
       </div>
       <div class="start-stats-cell">
@@ -129,6 +130,19 @@
 
         <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
 
+        <div class="rank-box" id="rank-box">
+          <button type="button" id="btn-rank-toggle" class="rank-toggle">Mit anderen Teilnehmern vergleichen &rarr;</button>
+
+          <form id="rank-form" class="rank-form" hidden>
+            <input type="text" id="rank-name" class="rank-input" placeholder="Vorname" autocomplete="given-name" required>
+            <input type="email" id="rank-email" class="rank-input" placeholder="E-Mail" autocomplete="email" required>
+            <button type="submit" class="btn-cta btn-cta-secondary rank-submit">Rang anzeigen</button>
+          </form>
+
+          <p class="rank-hint" id="rank-hint" hidden></p>
+          <div class="rank-result" id="rank-result" hidden></div>
+        </div>
+
         <div class="cta-box">
           <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
         </div>
@@ -137,6 +151,6 @@
   </div>
 </section>
 
-<script src="app.js?v=22"></script>
+<script src="app.js?v=25"></script>
 </body>
 </html>
