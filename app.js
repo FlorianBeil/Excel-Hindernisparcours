@@ -7,14 +7,13 @@
   const REFERENCE_TIME_SECONDS = 28.0;
 
   /* ---------------------------------------------------------------
-   * Ranking (Supabase, dasselbe Projekt wie das Übungsportal) – ein Lauf
-   * landet nur in der Datenbank, wenn der Spieler sich freiwillig mit
-   * Vorname + E-Mail zum Vergleich anmeldet (kein automatisches Tracking).
-   * Weder die Bestzeit- noch die Rang-Abfrage lesen die Tabelle direkt –
-   * beides läuft über RPC-Funktionen, die nur aggregierte Zahlen liefern,
-   * nie die Namen/E-Mails anderer Teilnehmer (siehe hindernisparkour_runs.sql).
+   * Ranking (Supabase, dasselbe Projekt wie das Übungsportal) – komplett
+   * anonym: jeder abgeschlossene Lauf wird automatisch eingetragen, ohne
+   * Name/E-Mail. Weder die Bestzeit- noch die Rang-Abfrage lesen die
+   * Tabelle direkt – beides läuft über RPC-Funktionen, die nur
+   * aggregierte Zahlen liefern (siehe hindernisparkour_runs.sql).
    * Alles best effort: schlägt die Verbindung fehl, bleibt einfach der
-   * lokale Platzhalter "–" stehen bzw. eine Fehlermeldung im Formular.
+   * lokale Platzhalter "–" stehen bzw. die Rang-Anzeige leer.
    * ------------------------------------------------------------- */
   const SUPABASE_URL = "https://hbhagmmbowplzjzfvuao.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_Ee47HbgO5Ne8PP9Jh5ugag_iE_lZcp6";
@@ -45,17 +44,17 @@
       .catch(() => {}); // best effort, Platzhalter "–" bleibt stehen
   }
 
-  // Trägt den Lauf (Name, E-Mail, Zeit) ein und liefert den Rang zurück –
-  // wird nur beim freiwilligen Absenden des Vergleichs-Formulars aufgerufen.
-  function submitRankEntry(firstName, email, seconds) {
+  // Trägt den Lauf automatisch (anonym) ein und liefert Rang + Teilnehmerzahl
+  // + aktuelle Bestzeit zurück – wird bei jedem Abschluss der Challenge aufgerufen.
+  function recordRun(seconds) {
     const client = getSupabaseClient();
     if (!client) return Promise.reject(new Error("Supabase nicht verfügbar"));
     return client
       .from(RUNS_TABLE)
-      .insert({ first_name: firstName, email: email, seconds: seconds })
+      .insert({ seconds: seconds })
       .then(({ error }) => {
         if (error) throw error;
-        return client.rpc("hindernisparkour_rank", { p_seconds: seconds });
+        return client.rpc("hindernisparkour_stats", { p_seconds: seconds });
       })
       .then(({ data, error }) => {
         if (error) throw error;
@@ -1234,11 +1233,6 @@
   const btnReset = document.getElementById("btn-reset");
   const topBarEl = document.querySelector(".top-bar");
   const startBestTimeEl = document.getElementById("start-best-time");
-  const btnRankToggle = document.getElementById("btn-rank-toggle");
-  const rankFormEl = document.getElementById("rank-form");
-  const rankNameEl = document.getElementById("rank-name");
-  const rankEmailEl = document.getElementById("rank-email");
-  const rankHintEl = document.getElementById("rank-hint");
   const rankResultEl = document.getElementById("rank-result");
 
   function showScreen(name) {
@@ -1259,7 +1253,6 @@
   let timerStartMs = 0;
   let timerInterval = null;
   let wrongToastTimer = null;
-  let currentResultSeconds = null;
 
   function renderCurrentTask() {
     const task = TASKS[currentTaskIndex];
@@ -1356,8 +1349,8 @@
   }
 
   function showResultScreen(finalSeconds) {
-    currentResultSeconds = finalSeconds;
-    resetRankBox();
+    rankResultEl.hidden = true;
+    rankResultEl.innerHTML = "";
     resultTimeEl.textContent = finalSeconds.toFixed(1) + "s";
     const diff = Math.abs(finalSeconds - REFERENCE_TIME_SECONDS).toFixed(1);
     const refLabel = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
@@ -1372,6 +1365,20 @@
     }
     showScreen("result");
     spawnConfetti();
+
+    recordRun(finalSeconds)
+      .then((stats) => {
+        if (!stats) return;
+        const isNewBest = stats.best_seconds != null && finalSeconds <= Number(stats.best_seconds);
+        rankResultEl.hidden = false;
+        if (isNewBest) {
+          rankResultEl.innerHTML = `🏆 Neue Bestzeit! Platz <span class="rank-number">1</span> von ${stats.total} Teilnehmern`;
+        } else {
+          const behind = (finalSeconds - Number(stats.best_seconds)).toFixed(1);
+          rankResultEl.innerHTML = `${behind}s hinter der Bestzeit (${Number(stats.best_seconds).toFixed(1)}s) · Platz <span class="rank-number">${stats.rank}</span> von ${stats.total} Teilnehmern`;
+        }
+      })
+      .catch(() => {}); // best effort, keine Rang-Anzeige statt Fehlermeldung
   }
 
   const CONFETTI_COLORS = ["#37874a", "#22452b", "#ff8a00", "#8fd3a2", "#f2c94c"];
@@ -1460,49 +1467,6 @@
   btnStart.addEventListener("click", startChallenge);
   btnRetry.addEventListener("click", backToStart);
   btnReset.addEventListener("click", backToStart);
-
-  function resetRankBox() {
-    btnRankToggle.hidden = false;
-    rankFormEl.hidden = true;
-    rankFormEl.reset();
-    rankHintEl.hidden = true;
-    rankHintEl.textContent = "";
-    rankResultEl.hidden = true;
-    rankResultEl.innerHTML = "";
-    rankFormEl.querySelector(".rank-submit").disabled = false;
-  }
-
-  btnRankToggle.addEventListener("click", () => {
-    btnRankToggle.hidden = true;
-    rankFormEl.hidden = false;
-    rankNameEl.focus();
-  });
-
-  rankFormEl.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const firstName = rankNameEl.value.trim();
-    const email = rankEmailEl.value.trim();
-    if (!firstName || !email || currentResultSeconds == null) return;
-    const submitBtn = rankFormEl.querySelector(".rank-submit");
-    submitBtn.disabled = true;
-    rankHintEl.hidden = false;
-    rankHintEl.textContent = "Wird eingetragen …";
-    submitRankEntry(firstName, email, currentResultSeconds)
-      .then((result) => {
-        rankFormEl.hidden = true;
-        rankHintEl.hidden = true;
-        rankResultEl.hidden = false;
-        if (result) {
-          rankResultEl.innerHTML = `🏆 Platz <span class="rank-number">${result.rank}</span> von ${result.total} Teilnehmern`;
-        } else {
-          rankResultEl.textContent = "Eingetragen! Dein Rang konnte gerade nicht ermittelt werden.";
-        }
-      })
-      .catch(() => {
-        submitBtn.disabled = false;
-        rankHintEl.textContent = "Das hat leider nicht geklappt – versuch's gleich nochmal.";
-      });
-  });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && screens.start.classList.contains("active")) {
