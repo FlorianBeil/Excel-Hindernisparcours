@@ -8,22 +8,40 @@
 
   /* ---------------------------------------------------------------
    * Ranking (Supabase, dasselbe Projekt wie das Übungsportal) – komplett
-   * anonym: jeder abgeschlossene Lauf wird automatisch eingetragen, ohne
-   * Name/E-Mail. Weder die Bestzeit- noch die Rang-Abfrage lesen die
-   * Tabelle direkt – beides läuft über RPC-Funktionen, die nur
-   * aggregierte Zahlen liefern (siehe hindernisparkour_runs.sql).
-   * Alles best effort: schlägt die Verbindung fehl, bleibt einfach der
-   * lokale Platzhalter "–" stehen bzw. die Rang-Anzeige leer.
+   * anonym, aber pro Gerät dedupliziert: eine zufällige, in localStorage
+   * gespeicherte ID (genau wie "excelflo_anon_id" im Übungsportal) sorgt
+   * dafür, dass jeder Teilnehmer nur EINE Zeile mit seiner persönlichen
+   * Bestzeit hat – beliebig viele Retries zählen nie als weitere
+   * Teilnehmer. Die Tabelle selbst ist über die normale API weder lesbar
+   * noch schreibbar, nur die RPC-Funktion unten (siehe
+   * hindernisparkour_runs.sql) darf sie ändern. Alles best effort:
+   * schlägt die Verbindung fehl, bleibt einfach der lokale Platzhalter
+   * "–" stehen bzw. die Rang-Anzeige leer.
    * ------------------------------------------------------------- */
   const SUPABASE_URL = "https://hbhagmmbowplzjzfvuao.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_Ee47HbgO5Ne8PP9Jh5ugag_iE_lZcp6";
-  const RUNS_TABLE = "hindernisparkour_runs";
+  const ANON_ID_KEY = "hindernisparkour_anon_id";
 
   let supabaseClient = null;
   function getSupabaseClient() {
     if (!window.supabase || !window.supabase.createClient) return null; // SDK nicht geladen (z.B. offline/geblockt)
     if (!supabaseClient) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     return supabaseClient;
+  }
+
+  function getAnonId() {
+    try {
+      let id = localStorage.getItem(ANON_ID_KEY);
+      if (!id) {
+        id = window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : "anon-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+        localStorage.setItem(ANON_ID_KEY, id);
+      }
+      return id;
+    } catch (e) {
+      return null; // z.B. localStorage blockiert/privater Modus
+    }
   }
 
   function fmtBestTime(seconds) {
@@ -44,18 +62,16 @@
       .catch(() => {}); // best effort, Platzhalter "–" bleibt stehen
   }
 
-  // Trägt den Lauf automatisch (anonym) ein und liefert Rang + Teilnehmerzahl
-  // + aktuelle Bestzeit zurück – wird bei jedem Abschluss der Challenge aufgerufen.
+  // Trägt den Lauf ein (überschreibt die eigene Zeile nur, wenn diese Runde
+  // besser war) und liefert Rang, Teilnehmerzahl, Bestzeit und die
+  // tatsächlich gespeicherte persönliche Bestzeit zurück – wird bei jedem
+  // Abschluss der Challenge aufgerufen.
   function recordRun(seconds) {
     const client = getSupabaseClient();
-    if (!client) return Promise.reject(new Error("Supabase nicht verfügbar"));
+    const anonId = getAnonId();
+    if (!client || !anonId) return Promise.reject(new Error("Supabase/Anon-ID nicht verfügbar"));
     return client
-      .from(RUNS_TABLE)
-      .insert({ seconds: seconds })
-      .then(({ error }) => {
-        if (error) throw error;
-        return client.rpc("hindernisparkour_stats", { p_seconds: seconds });
-      })
+      .rpc("hindernisparkour_submit", { p_anon_id: anonId, p_seconds: seconds })
       .then(({ data, error }) => {
         if (error) throw error;
         loadBestTime(); // Startseiten-Bestzeit könnte sich gerade geändert haben
@@ -1369,13 +1385,18 @@
     recordRun(finalSeconds)
       .then((stats) => {
         if (!stats) return;
-        const isNewBest = stats.best_seconds != null && finalSeconds <= Number(stats.best_seconds);
+        // Rang/Vergleich beziehen sich auf die gespeicherte persönliche Bestzeit
+        // (my_seconds), nicht zwingend auf diesen einen Lauf – ein schlechterer
+        // Retry darf den bisherigen persönlichen Rang nicht verschlechtern.
+        const mySeconds = Number(stats.my_seconds);
+        const bestSeconds = Number(stats.best_seconds);
+        const isTop = bestSeconds != null && mySeconds <= bestSeconds;
         rankResultEl.hidden = false;
-        if (isNewBest) {
+        if (isTop) {
           rankResultEl.innerHTML = `🏆 Neue Bestzeit! Platz <span class="rank-number">1</span> von ${stats.total} Teilnehmern`;
         } else {
-          const behind = (finalSeconds - Number(stats.best_seconds)).toFixed(1);
-          rankResultEl.innerHTML = `${behind}s hinter der Bestzeit (${Number(stats.best_seconds).toFixed(1)}s) · Platz <span class="rank-number">${stats.rank}</span> von ${stats.total} Teilnehmern`;
+          const behind = (mySeconds - bestSeconds).toFixed(1);
+          rankResultEl.innerHTML = `${behind}s hinter der Bestzeit (${bestSeconds.toFixed(1)}s) · Platz <span class="rank-number">${stats.rank}</span> von ${stats.total} Teilnehmern`;
         }
       })
       .catch(() => {}); // best effort, keine Rang-Anzeige statt Fehlermeldung
