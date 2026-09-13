@@ -35,11 +35,12 @@ html, body {
 }
 
 body {
-  background-color: #f6f6f6;
-  background-image: linear-gradient(rgba(223, 245, 231, 0.79) 0%, rgb(246, 246, 246) 63%),
-    url("bg-excel-flo.svg");
-  background-repeat: no-repeat, no-repeat;
-  background-position: 0% 0%, 0% 0%;
+  background-color: #F7F9F8;
+  background-image: url("bg-green.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .top-bar {
@@ -161,14 +162,16 @@ h1 {
 #screen-start {
   min-height: 100vh;
   padding: 0;
-  align-items: stretch;
+  align-items: flex-start; /* nicht strecken, sonst greift die Höhen-Obergrenze unten nicht */
   justify-content: stretch;
   overflow-y: auto;
 }
 
+/* Höhe gedeckelt: in einem hohen iframe (Ablefy) wäre 100vh riesig und der
+   senkrecht zentrierte Inhalt rutscht weit nach unten. */
 .start-container {
   width: 100%;
-  min-height: 100vh;
+  min-height: min(100vh, 860px);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
