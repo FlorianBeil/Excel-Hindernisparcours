@@ -1415,9 +1415,15 @@
         const mySeconds = Number(stats.my_seconds);
         const bestSeconds = Number(stats.best_seconds);
         const isTop = bestSeconds != null && mySeconds <= bestSeconds;
+        // "Neue Bestzeit" darf nur stehen, wenn DIESER Lauf sie gesetzt hat - sonst
+        // hält man z.B. mit einem alten 18s-Lauf weiter Platz 1, obwohl dieser
+        // Versuch (20.8s) schlechter war, und "Neue Bestzeit!" wäre irreführend.
+        const improvedThisRun = Math.abs(finalSeconds - mySeconds) < 0.005;
         rankResultEl.hidden = false;
-        if (isTop) {
+        if (isTop && improvedThisRun) {
           rankResultEl.innerHTML = `🏆 Neue Bestzeit! Platz <span class="rank-number">1</span> von ${stats.total} Teilnehmern`;
+        } else if (isTop) {
+          rankResultEl.innerHTML = `🏆 Deine Bestzeit (${mySeconds.toFixed(1)}s) bleibt ungeschlagen · Platz <span class="rank-number">1</span> von ${stats.total} Teilnehmern`;
         } else {
           const behind = (mySeconds - bestSeconds).toFixed(1);
           rankResultEl.innerHTML = `${behind}s hinter der Bestzeit (${bestSeconds.toFixed(1)}s) · Platz <span class="rank-number">${stats.rank}</span> von ${stats.total} Teilnehmern`;
