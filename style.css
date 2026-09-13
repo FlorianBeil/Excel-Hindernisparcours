@@ -1008,7 +1008,7 @@ table.sheet td.cell.range-border {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 24px 40px;
+  padding: 6px 24px 24px;
 }
 
 @keyframes result-pop {
@@ -1057,7 +1057,7 @@ table.sheet td.cell.range-border {
 
 .result-hero {
   position: relative;
-  padding: 32px 32px 30px;
+  padding: 20px 28px 22px;
   color: #fff;
   background:
     radial-gradient(circle at 18% 0%, rgba(143,211,162,.45), transparent 55%),
@@ -1080,16 +1080,16 @@ table.sheet td.cell.range-border {
 .result-hero > * { position: relative; }
 
 .result-badge {
-  width: 72px;
-  height: 72px;
-  margin: 0 auto 14px;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
   border-radius: 50%;
   background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 38px;
-  box-shadow: 0 0 0 6px rgba(255,255,255,.18), 0 0 0 12px rgba(255,255,255,.08);
+  font-size: 28px;
+  box-shadow: 0 0 0 5px rgba(255,255,255,.18), 0 0 0 10px rgba(255,255,255,.08);
   animation: badge-bounce 700ms cubic-bezier(.34,1.56,.64,1) 200ms both;
 }
 
@@ -1107,17 +1107,17 @@ table.sheet td.cell.range-border {
 }
 
 #result-headline {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   font-family: var(--font-inter);
   font-weight: 700;
-  font-size: 30px;
+  font-size: 26px;
   color: #fff;
 }
 
 .result-time {
-  margin: 12px 0 0;
+  margin: 6px 0 0;
   font-family: var(--font-jetbrains-mono);
-  font-size: 76px;
+  font-size: 60px;
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -1132,20 +1132,20 @@ table.sheet td.cell.range-border {
   opacity: 0.8;
 }
 
-.result-body { padding: 24px 32px 26px; }
+.result-body { padding: 18px 28px 18px; }
 
 .result-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .result-stat {
   background: var(--color-page-bg);
   border: 1px solid var(--color-card-border);
   border-radius: 10px;
-  padding: 12px 8px 10px;
+  padding: 9px 8px 8px;
 }
 
 .result-stat.is-highlight {
@@ -1184,7 +1184,7 @@ table.sheet td.cell.range-border {
   font-weight: 600;
   padding: 8px 16px;
   border-radius: 999px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .result-compare.faster {
@@ -1208,26 +1208,26 @@ table.sheet td.cell.range-border {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 14px;
-  margin-top: 22px;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .result-actions .btn-cta {
   width: 100%;
-  font-size: 18px;
-  padding: 18px 20px 20px;
+  font-size: 17px;
+  padding: 13px 20px 15px;
 }
 
 .guide-subtext {
-  margin: -4px 0 0;
+  margin: -2px 0 0;
   font-family: var(--font-inter);
   font-size: 13px;
   color: var(--color-body);
 }
 
 .cta-share {
-  margin: 18px 0 0;
-  padding-top: 16px;
+  margin: 12px 0 0;
+  padding-top: 10px;
   border-top: 1px dashed var(--color-card-border);
   font-family: var(--font-inter);
   font-size: 13px;
