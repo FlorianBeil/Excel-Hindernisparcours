@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=26">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -37,34 +37,35 @@
     </div>
 
     <div class="start-hero">
-      <div class="start-eyebrow">SPEEDRUN &middot; NUR TASTATUR</div>
-      <h1 class="start-title">Excel <span class="accent">Hindernisparcours</span></h1>
-      <p class="start-subline">7 Aufgaben. Ein Timer. Keine Maus. Jede H&uuml;rde l&ouml;st du mit einem Excel-Shortcut - so schnell du kannst.</p>
-      <div class="start-cta-row">
+      <div class="start-eyebrow"><span class="live-dot"></span>SPEEDRUN &middot; NUR TASTATUR</div>
+      <h1 class="start-title"><span class="title-key">Excel</span><span class="accent">Hindernisparcours</span></h1>
+      <p class="start-subline">7 Aufgaben. Ein Timer. Keine Maus. Jede H&uuml;rde l&ouml;st du mit einem Excel-Shortcut &ndash; so schnell du kannst.</p>
+      <div class="start-cta-block">
         <button id="btn-start" type="button" class="btn-cta">CHALLENGE STARTEN</button>
         <span class="start-cta-hint">oder <span class="keycap">Enter</span> dr&uuml;cken</span>
       </div>
+
+      <div class="start-stats">
+        <div class="start-stats-cell">
+          <div class="start-stats-value">7</div>
+          <div class="start-stats-label">H&Uuml;RDEN</div>
+        </div>
+        <div class="start-stats-cell">
+          <div class="start-stats-value" id="start-best-time">&ndash;</div>
+          <div class="start-stats-label">BESTZEIT</div>
+        </div>
+        <div class="start-stats-cell">
+          <div class="start-stats-value" id="start-participants">&ndash;</div>
+          <div class="start-stats-label">TEILNEHMER</div>
+        </div>
+      </div>
     </div>
 
-    <div class="start-stats">
-      <div class="start-stats-cell">
-        <div class="start-stats-value">7</div>
-        <div class="start-stats-label">H&Uuml;RDEN</div>
-      </div>
-      <div class="start-stats-cell">
-        <div class="start-stats-value" id="start-best-time">&ndash;</div>
-        <div class="start-stats-label">BESTZEIT</div>
-      </div>
-      <div class="start-stats-cell">
-        <div class="start-stats-value">100+</div>
-        <div class="start-stats-label">TEILNEHMER</div>
-      </div>
-      <div class="start-stats-cell start-stats-mod">
-        <span class="keycap">Strg</span>
-        <span class="start-mod-sep">/</span>
-        <span class="keycap">Cmd</span>
-        <span class="start-mod-text">automatisch erkannt</span>
-      </div>
+    <div class="start-footnote">
+      <span class="keycap">Strg</span>
+      <span class="start-mod-sep">/</span>
+      <span class="keycap">Cmd</span>
+      <span>wird automatisch erkannt</span>
     </div>
   </div>
 </section>
@@ -124,20 +125,39 @@
       <span class="task-wordmark">Excel.Flo</span>
     </div>
     <div class="result-content">
-      <div class="card center">
-        <h1 id="result-headline">Geschafft!</h1>
-        <div class="result-time" id="result-time">0.0s</div>
-        <div class="result-compare" id="result-compare"></div>
-        <div class="rank-result" id="rank-result" hidden></div>
-
-        <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
-
-        <div class="guide-box">
-          <a href="https://go.excel-flo.de/shortcut-guide-hp/?utm_source=shop&amp;utm_medium=referral&amp;utm_campaign=evergreen&amp;utm_content=startseite" target="_blank" rel="noopener" class="btn-cta btn-cta-secondary" id="btn-guide">Hol dir meinen Shortcut-Guide</a>
-          <p class="guide-subtext">Die wichtigsten Excel-Shortcuts zum Nachschlagen</p>
+      <div class="card center result-card">
+        <div class="result-hero">
+          <div class="result-badge" id="result-badge">&#127937;</div>
+          <div class="result-eyebrow">ZIEL ERREICHT &middot; 7/7 H&Uuml;RDEN</div>
+          <h1 id="result-headline">Geschafft!</h1>
+          <div class="result-time"><span id="result-time">0.0</span><span class="result-time-unit">s</span></div>
         </div>
 
-        <div class="cta-box">
+        <div class="result-body">
+          <div class="result-stats">
+            <div class="result-stat is-highlight">
+              <div class="result-stat-value" id="result-rank">&ndash;</div>
+              <div class="result-stat-label">PLATZ</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-value" id="result-best">&ndash;</div>
+              <div class="result-stat-label">BESTZEIT</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-value" id="result-ref">&ndash;</div>
+              <div class="result-stat-label">FLOS ZEIT</div>
+            </div>
+          </div>
+
+          <div class="result-compare" id="result-compare"></div>
+          <div class="rank-result" id="rank-result" hidden></div>
+
+          <div class="result-actions">
+            <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
+            <a href="https://go.excel-flo.de/shortcut-guide-hp/?utm_source=shop&amp;utm_medium=referral&amp;utm_campaign=evergreen&amp;utm_content=startseite" target="_blank" rel="noopener" class="btn-cta btn-cta-secondary" id="btn-guide">Hol dir meinen Shortcut-Guide</a>
+            <p class="guide-subtext">Die wichtigsten Excel-Shortcuts zum Nachschlagen</p>
+          </div>
+
           <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
         </div>
       </div>
@@ -145,6 +165,6 @@
   </div>
 </section>
 
-<script src="app.js?v=34"></script>
+<script src="app.js?v=36"></script>
 </body>
 </html>

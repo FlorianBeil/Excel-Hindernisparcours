@@ -60,6 +60,14 @@
         startBestTimeEl.textContent = fmtBestTime(Number(data));
       })
       .catch(() => {}); // best effort, Platzhalter "–" bleibt stehen
+    // Teilnehmerzahl (siehe hindernisparkour_participant_count.sql)
+    client
+      .rpc("hindernisparkour_participant_count")
+      .then(({ data, error }) => {
+        if (error || data == null) return;
+        startParticipantsEl.textContent = Number(data).toLocaleString("de-DE");
+      })
+      .catch(() => {});
   }
 
   // Trägt den Lauf ein (überschreibt die eigene Zeile nur, wenn diese Runde
@@ -1329,7 +1337,12 @@
   const btnReset = document.getElementById("btn-reset");
   const topBarEl = document.querySelector(".top-bar");
   const startBestTimeEl = document.getElementById("start-best-time");
+  const startParticipantsEl = document.getElementById("start-participants");
   const rankResultEl = document.getElementById("rank-result");
+  const resultBadgeEl = document.getElementById("result-badge");
+  const resultRankEl = document.getElementById("result-rank");
+  const resultBestEl = document.getElementById("result-best");
+  const resultRefEl = document.getElementById("result-ref");
 
   function showScreen(name) {
     Object.entries(screens).forEach(([key, el]) => {
@@ -1446,18 +1459,22 @@
 
   function showResultScreen(finalSeconds) {
     rankResultEl.hidden = true;
-    rankResultEl.innerHTML = "";
-    resultTimeEl.textContent = finalSeconds.toFixed(1) + "s";
+    rankResultEl.textContent = "";
+    resultRankEl.textContent = "–";
+    resultBestEl.textContent = startBestTimeEl.textContent;
+    animateResultTime(finalSeconds);
     const diff = Math.abs(finalSeconds - REFERENCE_TIME_SECONDS).toFixed(1);
-    const refLabel = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
+    resultRefEl.textContent = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
     const beatReference = finalSeconds < REFERENCE_TIME_SECONDS;
     if (beatReference) {
       resultHeadlineEl.textContent = "Stark gemacht!";
-      resultCompareEl.textContent = `🏆 ${diff}s schneller als Flos Referenzzeit (${refLabel})`;
+      resultBadgeEl.textContent = "\u{1F3C6}";
+      resultCompareEl.textContent = `⚡ ${diff}s schneller als Flo`;
       resultCompareEl.className = "result-compare faster";
     } else {
       resultHeadlineEl.textContent = "Geschafft!";
-      resultCompareEl.textContent = `${diff}s langsamer als Flos Referenzzeit (${refLabel})`;
+      resultBadgeEl.textContent = "\u{1F3C1}";
+      resultCompareEl.textContent = `${diff}s langsamer als Flo`;
       resultCompareEl.className = "result-compare slower";
     }
     showScreen("result");
@@ -1485,21 +1502,42 @@
         // hält man z.B. mit einem alten 18s-Lauf weiter Platz 1, obwohl dieser
         // Versuch (20.8s) schlechter war, und "Neue Bestzeit!" wäre irreführend.
         const improvedThisRun = Math.abs(finalSeconds - mySeconds) < 0.005;
+        const rank = isTop ? 1 : stats.rank;
+        resultRankEl.innerHTML = `${rank}<small>/${stats.total}</small>`;
+        if (!Number.isNaN(bestSeconds)) resultBestEl.textContent = fmtBestTime(bestSeconds);
         rankResultEl.hidden = false;
         if (isTop && improvedThisRun) {
-          rankResultEl.innerHTML = `🏆 Neue Bestzeit! Platz <span class="rank-number">1</span> von ${stats.total} Teilnehmern`;
+          rankResultEl.textContent = "🏆 Neue Bestzeit! Du bist die Nr. 1.";
         } else if (isTop) {
-          rankResultEl.innerHTML = `🏆 Deine Bestzeit (${mySeconds.toFixed(1)}s) bleibt ungeschlagen · Platz <span class="rank-number">1</span> von ${stats.total} Teilnehmern`;
+          rankResultEl.textContent = `🏆 Deine Bestzeit (${mySeconds.toFixed(1)}s) ist weiterhin die schnellste.`;
         } else {
           const behind = (mySeconds - bestSeconds).toFixed(1);
-          rankResultEl.innerHTML = `${behind}s hinter der Bestzeit (${bestSeconds.toFixed(1)}s) · Platz <span class="rank-number">${stats.rank}</span> von ${stats.total} Teilnehmern`;
+          rankResultEl.textContent = improvedThisRun
+            ? `🎉 Neue persönliche Bestzeit · noch ${behind}s bis Platz 1`
+            : `Deine persönliche Bestzeit: ${mySeconds.toFixed(1)}s · noch ${behind}s bis Platz 1`;
         }
         if (!confettiFired && stats.rank <= 10) spawnConfetti();
       })
       .catch(() => {}); // best effort, keine Rang-Anzeige statt Fehlermeldung
   }
 
-  const CONFETTI_COLORS = ["#37874a", "#22452b", "#ff8a00", "#8fd3a2", "#f2c94c"];
+  // Zählt die Endzeit in ~0,9s von 0 hoch. setInterval statt requestAnimationFrame,
+  // damit in Hintergrund-Tabs trotzdem der Endwert erscheint.
+  let resultTimeTimer = null;
+  function animateResultTime(target) {
+    clearInterval(resultTimeTimer);
+    const start = performance.now();
+    const duration = 900;
+    resultTimeEl.textContent = "0.0";
+    resultTimeTimer = setInterval(() => {
+      const t = Math.min(1, (performance.now() - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      resultTimeEl.textContent = (target * eased).toFixed(1);
+      if (t >= 1) clearInterval(resultTimeTimer);
+    }, 30);
+  }
+
+  const CONFETTI_COLORS =["#37874a", "#22452b", "#ff8a00", "#8fd3a2", "#f2c94c"];
 
   function spawnConfetti() {
     confettiLayerEl.innerHTML = "";
