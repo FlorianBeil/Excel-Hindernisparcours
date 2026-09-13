@@ -2,9 +2,9 @@
   "use strict";
 
   /* ---------------------------------------------------------------
-   * Referenzzeit von Excel.Flo – Platzhalter, hier leicht änderbar
+   * Referenzzeit von Excel.Flo
    * ------------------------------------------------------------- */
-  const REFERENCE_TIME_SECONDS = 22.1;
+  const REFERENCE_TIME_SECONDS = 18.4;
 
   /* ---------------------------------------------------------------
    * Ranking (Supabase, dasselbe Projekt wie das Übungsportal) – komplett
