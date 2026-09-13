@@ -432,6 +432,7 @@
       customHandleKey(e, ctx) {
         const key = e.key;
         const isArrow = key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
+        const isTab = key === "Tab";
         const modOnly = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey;
         const isAnyModCombo = e.ctrlKey || e.metaKey || e.altKey;
         const isSelectCombo = modOnly && (key === " " || e.code === "Space");
@@ -441,6 +442,16 @@
           e.preventDefault();
         }
         if (PURE_MODIFIER_KEYS.has(key)) return;
+
+        if (isTab) {
+          // Tab bewegt wie in echtem Excel nach rechts, Umschalt+Tab nach links.
+          e.preventDefault();
+          ctx.colSelected = null;
+          const c = e.shiftKey ? Math.max(0, ctx.activeCell.c - 1) : Math.min(ctx.cols - 1, ctx.activeCell.c + 1);
+          ctx.activeCell = { r: ctx.activeCell.r, c };
+          renderCurrentTask();
+          return;
+        }
 
         if (isArrow) {
           // Gehaltene Pfeiltaste soll weiter navigieren (Auto-Repeat), nur die Aktions-Shortcuts
@@ -526,6 +537,7 @@
       customHandleKey(e, ctx) {
         const key = e.key;
         const isArrow = key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
+        const isTab = key === "Tab";
         const isAnyModCombo = e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
         const isSelectRowCombo = e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && (key === " " || e.code === "Space");
         const isDeleteCombo = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (key === "-" || e.code === "Minus" || e.code === "NumpadSubtract");
@@ -534,6 +546,16 @@
           e.preventDefault();
         }
         if (PURE_MODIFIER_KEYS.has(key)) return;
+
+        if (isTab) {
+          // Tab bewegt wie in echtem Excel nach rechts, Umschalt+Tab nach links.
+          e.preventDefault();
+          ctx.rowSelected = null;
+          const c = e.shiftKey ? Math.max(0, ctx.activeCell.c - 1) : Math.min(ctx.cols - 1, ctx.activeCell.c + 1);
+          ctx.activeCell = { r: ctx.activeCell.r, c };
+          renderCurrentTask();
+          return;
+        }
 
         if (isArrow) {
           ctx.rowSelected = null;
@@ -644,6 +666,7 @@
         const key = e.key;
         const lower = key.toLowerCase();
         const isArrow = key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
+        const isTab = key === "Tab";
         const modOnly = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey;
         const isAnyModCombo = e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
         const isCut = modOnly && lower === "x";
@@ -653,6 +676,17 @@
           e.preventDefault();
         }
         if (PURE_MODIFIER_KEYS.has(key)) return;
+
+        if (isTab) {
+          // Tab bewegt wie in echtem Excel nach rechts, Umschalt+Tab nach links -
+          // und kollabiert dabei immer die Markierung (anders als Umschalt+Pfeil).
+          e.preventDefault();
+          const c = e.shiftKey ? Math.max(0, ctx.activeCell.c - 1) : Math.min(ctx.cols - 1, ctx.activeCell.c + 1);
+          ctx.activeCell = { r: ctx.activeCell.r, c };
+          ctx.selAnchor = { r: ctx.activeCell.r, c };
+          renderCurrentTask();
+          return;
+        }
 
         if (isArrow) {
           let { r, c } = ctx.activeCell;
@@ -796,6 +830,7 @@
       customHandleKey(e, ctx) {
         const key = e.key;
         const isArrow = key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
+        const isTab = key === "Tab";
         const ctrlOrMeta = e.ctrlKey || e.metaKey;
         const isAnyModCombo = e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
         // Bei gehaltener Umschalt-Taste liefert e.key auf so gut wie jeder Tastaturbelegung (auch
@@ -813,6 +848,17 @@
           e.preventDefault();
         }
         if (PURE_MODIFIER_KEYS.has(key)) return;
+
+        if (isTab) {
+          // Tab bewegt wie in echtem Excel nach rechts, Umschalt+Tab nach links -
+          // und kollabiert dabei immer die Markierung (anders als Umschalt+Pfeil).
+          e.preventDefault();
+          const c = e.shiftKey ? Math.max(0, ctx.activeCell.c - 1) : Math.min(ctx.cols - 1, ctx.activeCell.c + 1);
+          ctx.activeCell = { r: ctx.activeCell.r, c };
+          ctx.selAnchor = { r: ctx.activeCell.r, c };
+          renderCurrentTask();
+          return;
+        }
 
         if (isArrow) {
           const delta = ARROW_DELTA[key];
@@ -1098,16 +1144,24 @@
       customHandleKey(e, ctx) {
         const key = e.key;
         const isArrow = key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
-        if (!isArrow) return; // in dieser Aufgabe gibt es keine weiteren Shortcuts
+        const isTab = key === "Tab";
+        if (!isArrow && !isTab) return; // in dieser Aufgabe gibt es keine weiteren Shortcuts
         e.preventDefault();
 
-        const delta = ARROW_DELTA[key];
-        const newPos = (e.ctrlKey || e.metaKey)
-          ? findDataEdge(ctx, ctx.activeCell.r, ctx.activeCell.c, delta.dr, delta.dc)
-          : {
-              r: Math.max(0, Math.min(ctx.rows - 1, ctx.activeCell.r + delta.dr)),
-              c: Math.max(0, Math.min(ctx.cols - 1, ctx.activeCell.c + delta.dc)),
-            };
+        let newPos;
+        if (isTab) {
+          // Tab bewegt wie in echtem Excel nach rechts, Umschalt+Tab nach links.
+          const c = e.shiftKey ? Math.max(0, ctx.activeCell.c - 1) : Math.min(ctx.cols - 1, ctx.activeCell.c + 1);
+          newPos = { r: ctx.activeCell.r, c };
+        } else {
+          const delta = ARROW_DELTA[key];
+          newPos = (e.ctrlKey || e.metaKey)
+            ? findDataEdge(ctx, ctx.activeCell.r, ctx.activeCell.c, delta.dr, delta.dc)
+            : {
+                r: Math.max(0, Math.min(ctx.rows - 1, ctx.activeCell.r + delta.dr)),
+                c: Math.max(0, Math.min(ctx.cols - 1, ctx.activeCell.c + delta.dc)),
+              };
+        }
         ctx.activeCell = newPos;
 
         const expected = ctx.path[ctx.currentIndex + 1];
@@ -1178,6 +1232,7 @@
       customHandleKey(e, ctx) {
         const key = e.key;
         const isArrow = key === "ArrowLeft" || key === "ArrowRight" || key === "ArrowUp" || key === "ArrowDown";
+        const isTab = key === "Tab";
         const ctrlOrMeta = e.ctrlKey || e.metaKey;
         const isAnyModCombo = e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
         // Alt+= ist der eigentliche Excel-Shortcut; auf deutschen Tastaturen erreicht man "=" nur über
@@ -1191,6 +1246,17 @@
           e.preventDefault();
         }
         if (PURE_MODIFIER_KEYS.has(key)) return;
+
+        if (isTab) {
+          // Tab bewegt wie in echtem Excel nach rechts, Umschalt+Tab nach links -
+          // und kollabiert dabei immer die Markierung (anders als Umschalt+Pfeil).
+          e.preventDefault();
+          const c = e.shiftKey ? Math.max(0, ctx.activeCell.c - 1) : Math.min(ctx.cols - 1, ctx.activeCell.c + 1);
+          ctx.activeCell = { r: ctx.activeCell.r, c };
+          ctx.selAnchor = { r: ctx.activeCell.r, c };
+          renderCurrentTask();
+          return;
+        }
 
         if (isArrow) {
           const delta = ARROW_DELTA[key];
