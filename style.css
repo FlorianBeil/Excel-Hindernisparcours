@@ -206,11 +206,11 @@ h1 {
 .start-hero {
   position: relative;
   flex: 1;
-  padding: 24px 72px 40px;
+  padding: 40px 72px 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* direkt unter dem Logo beginnen, nicht mittig */
   text-align: center;
   gap: 26px;
 }
