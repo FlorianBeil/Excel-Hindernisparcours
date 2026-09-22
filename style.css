@@ -1421,3 +1421,19 @@ table.sheet td.cell.range-border {
   height: 1px;
   overflow: hidden;
 }
+
+/* ---------- Fußzeile mit Impressum und Datenschutz ---------- */
+
+.site-footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 14px 24px 20px;
+  font-size: 13px;
+  color: var(--color-body);
+}
+
+.site-footer a {
+  color: inherit;
+}
