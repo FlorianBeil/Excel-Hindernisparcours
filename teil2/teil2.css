@@ -1,0 +1,254 @@
+/* ===================================================================
+ * Excel Hindernisparkour – Teil 2
+ *
+ * Diese Datei ergaenzt ../style.css (Layout, Farben, Screens von Teil 1)
+ * nur um die Elemente, die es in Teil 1 noch nicht gab:
+ * Tabellen-Look der Kursdatei, Excel-Filtermenue und die Wegpunkte
+ * der Navigations-Aufgabe.
+ * Alles andere kommt unveraendert aus Teil 1 – damit bleiben beide Teile
+ * automatisch im selben Design.
+ * =================================================================== */
+
+/* ---------- Startseite: "Teil 2" unter der Headline ---------- */
+
+.start-part {
+  display: inline-block;
+  font-family: var(--font-jetbrains-mono);
+  font-weight: 700;
+  font-size: 0.26em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-brand-green-dark);
+  background: var(--color-accent-soft);
+  border-radius: 999px;
+  padding: 8px 18px;
+}
+
+/* ---------- Tabellen-Look der Kursdatei ---------- */
+
+table.sheet td.cell.head-green {
+  background: #285f31;
+  color: #fff;
+  font-weight: 700;
+}
+
+table.sheet td.cell.zebra {
+  background: #f7fbf4;
+}
+
+table.sheet td.cell.num {
+  text-align: right;
+}
+
+/* Vorgabe-Zelle, an der sich die Aufgabe orientiert (Muster bzw. Kopierquelle) */
+table.sheet td.cell.cell-source {
+  background: #f2f2f2;
+  font-weight: 700;
+}
+
+/* Hervorgehobene Ergebniszeile ("Endlich richtig entkalkt!") */
+table.sheet td.cell.cell-total {
+  background: #e2efda;
+  font-weight: 700;
+}
+
+/* Gefilterte Tabelle: Excel faerbt die Zeilennummern blau */
+table.sheet td.rowhead.row-filtered {
+  color: #1f6fd0;
+}
+
+/* ---------- Ueberlagerungen ueber dem Raster ---------- */
+
+#grid-container {
+  position: relative;
+}
+
+/* ---------- Menueband: Format-Untermenue (Spaltenbreiten-Aufgabe) ---------- */
+
+.ribbon-dropdown-format {
+  left: auto;
+  right: 10px;
+}
+
+.ribbon-dropdown-item.is-target {
+  background: var(--color-accent-soft);
+  font-weight: 600;
+}
+
+/* ---------- Navigations-Aufgabe: Wegpunkte, Start und Ziel ---------- */
+
+table.sheet td.cell.cell-waypoint,
+table.sheet td.cell.cell-endpoint {
+  text-align: center;
+}
+
+table.sheet td.cell.cell-endpoint {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Filtersymbol in der gruenen Kopfzeile ---------- */
+/* Excel zeigt rechts in der Kopfzelle einen kleinen weissen Knopf mit Pfeil.
+   Das Standard-Zeichen aus Teil 1 waere auf dem dunkelgruenen Kopf unsichtbar. */
+
+table.sheet td.cell.head-green {
+  position: relative;
+  padding-right: 28px;
+}
+
+table.sheet td.cell .filter-arrow {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  width: 17px;
+  height: 17px;
+  line-height: 17px;
+  text-align: center;
+  font-size: 9px;
+  background: #fff;
+  color: #285f31;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- Filtermenue im Excel-Look ---------- */
+
+.xl-filter {
+  position: absolute;
+  z-index: 8;
+  width: 272px;
+  background: #fff;
+  border: 1px solid #b7bcb9;
+  border-radius: 3px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  font-family: var(--font-inter);
+  font-size: 12.5px;
+  color: var(--color-heading);
+  padding: 4px 0;
+}
+
+.xl-menu {
+  border-bottom: 1px solid #e6e8e6;
+  padding: 3px 0;
+}
+
+.xl-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.xl-item.is-muted {
+  color: #8b918d;
+}
+
+.xl-icon {
+  display: inline-block;
+  width: 16px;
+  font-family: var(--font-jetbrains-mono);
+  font-size: 10px;
+  color: var(--color-brand-green-dark);
+}
+
+.xl-more {
+  margin-left: auto;
+  font-size: 10px;
+  color: #8b918d;
+}
+
+.xl-search {
+  margin: 7px 10px;
+  padding: 5px 8px;
+  border: 1px solid #c6cbc7;
+  border-radius: 2px;
+  color: #8b918d;
+  font-size: 12px;
+}
+
+.xl-list {
+  max-height: 152px;
+  overflow: hidden;
+  margin: 0 6px 4px;
+  border: 1px solid #e6e8e6;
+  border-radius: 2px;
+  padding: 3px 0;
+}
+
+.xl-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.xl-value.is-active {
+  background: var(--color-accent-soft);
+  outline: 1px dotted var(--color-brand-green-dark);
+  outline-offset: -2px;
+}
+
+.xl-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #8b918d;
+  border-radius: 2px;
+  background: #fff;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--color-brand-green-dark);
+}
+
+.xl-check.is-on {
+  border-color: var(--color-brand-green-dark);
+}
+
+.xl-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 6px 10px 4px;
+  border-top: 1px solid #e6e8e6;
+}
+
+.xl-btn {
+  border: 1px solid #c6cbc7;
+  border-radius: 3px;
+  padding: 4px 16px;
+  font-size: 12px;
+  background: #f6f7f6;
+}
+
+.xl-btn.is-primary {
+  background: var(--color-brand-green);
+  border-color: var(--color-brand-green);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Navigations-Aufgabe: der vorgezeichnete Pfad ---------- */
+
+table.sheet td.cell.cell-path {
+  background: #fff6cc;
+  color: #6b5600;
+}
+
+/* Bereits benutzter Buchstabe einer mehrstelligen Key-Tip-Folge (z. B. "FF") */
+.ribbon-keytip .keytip-used {
+  opacity: 0.45;
+}
+
+/* ---------- Geschuetzter gruener Block (Aufgabe "Zellen entfernen") ---------- */
+/* Das blasse Gruen aus Teil 1 wirkt neben dem kraeftigen Orange fast weiss. */
+
+table.sheet td.cell.zone-green {
+  background: #a9d08e;
+  color: #1a1a1a;
+}
