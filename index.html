@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=32">
+<link rel="stylesheet" href="style.css?v=33">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -165,8 +165,14 @@
 
               <form class="unlock-form" id="unlock-form" novalidate>
                 <div class="unlock-fields">
-                  <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="Vorname" autocomplete="given-name" required>
-                  <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="E-Mail-Adresse" autocomplete="email" required>
+                  <div class="unlock-field">
+                    <label class="unlock-label" for="unlock-firstname">Vorname</label>
+                    <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="z.&nbsp;B. Flo" autocomplete="given-name" required>
+                  </div>
+                  <div class="unlock-field">
+                    <label class="unlock-label" for="unlock-email">E-Mail-Adresse</label>
+                    <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="z.&nbsp;B. flo@beispiel.de" autocomplete="email" required>
+                  </div>
                 </div>
                 <button type="submit" class="btn-cta btn-cta-secondary" id="unlock-submit">LINK ZUSCHICKEN</button>
                 <p class="unlock-error" id="unlock-error" hidden></p>
