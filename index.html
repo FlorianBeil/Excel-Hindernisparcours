@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -184,6 +184,15 @@
           <!-- Nimmt die Antwort von KlickTipp auf, damit die Seite stehen bleibt. -->
           <iframe name="unlock-sink" id="unlock-sink" title="" aria-hidden="true" tabindex="-1" class="unlock-sink"></iframe>
 
+          <!-- Das unveraenderte Original-Formular aus KlickTipp (Listbuilding > RAW Code).
+               Es ist optisch versteckt und wird nur als Transportweg benutzt: Das sichtbare
+               Formular oben schreibt Vorname und E-Mail hier hinein und loest den Versand
+               aus. So bleiben Feldnamen, Spamschutz-Feld und das KlickTipp-Captcha-Skript
+               genau so, wie KlickTipp sie erwartet. -->
+          <div class="unlock-kt" aria-hidden="true">
+            <div id="form-358328-wrapper"><form id="ktv2-form-358328" accept-charset="UTF-8" method="post" action="https://app.klicktipp.com/api/subscriber/signin.html" ><input type="hidden" id="FormField_ApiKey" name="apikey" value="8chxzrlerz8zf8a5" /><input type="hidden" id="FormField_Digit" name="fields[fieldDigit]" value="" /><div class="ktv2-form-element"><label for="FormField_FirstName">Vorname: </label><br /><input type="text" id="FormField_FirstName" name="fields[fieldFirstName]" value="" tabindex="-1" /></div><div class="ktv2-form-element"><label for="FormField_EmailAddress">Ihre E-Mail-Adresse: </label><br /><input type="text" id="FormField_EmailAddress" name="email" value="" size="40" tabindex="-1" /></div><br /><div><input type="submit" id="FormSubmit" name="FormSubmit" value="Ihr Button-Text" tabindex="-1"/></div></form></div>
+          </div>
+
           <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
         </div>
       </div>
@@ -191,6 +200,7 @@
   </div>
 </section>
 
-<script src="app.js?v=39"></script>
+<script type="text/javascript" src="https://scripts.cdn.klicktipp.cloud/captcha/protect.js"></script>
+<script src="app.js?v=40"></script>
 </body>
 </html>

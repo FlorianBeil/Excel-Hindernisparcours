@@ -1392,3 +1392,15 @@ table.sheet td.cell.range-border {
 @media (max-width: 640px) {
   .unlock-fields { flex-direction: column; }
 }
+
+/* Das Original-Formular von KlickTipp liegt nur als Transportweg in der Seite:
+   optisch weggeschoben statt display:none, damit das Captcha-Skript von
+   KlickTipp es wie ein normales Formular behandelt. */
+.unlock-kt {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

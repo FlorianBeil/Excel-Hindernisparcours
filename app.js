@@ -1634,24 +1634,21 @@
   /* ---------------------------------------------------------------
    * Teil 2 freischalten – Eintrag in KlickTipp
    *
-   * GitHub Pages kann selbst keine Mails verschicken: Das Formular wird
-   * deshalb an KlickTipp gesendet, und KlickTipp verschickt die Mail mit
-   * dem Link zum zweiten Parcours (Double-Opt-in). Abgeschickt wird in ein
-   * verstecktes iframe, damit die Seite stehen bleibt und wir unsere eigene
-   * Bestätigung zeigen können – die Antwort von KlickTipp können wir aus
-   * dem iframe nicht lesen (fremde Domain), der Erfolg wird also angenommen.
+   * GitHub Pages bzw. Vercel liefern nur statische Dateien aus, verschicken
+   * also selbst keine Mails. Das sichtbare Formular befüllt deshalb das
+   * unveränderte KlickTipp-Formular im HTML (Opt-In-Prozess "Hindernisparcours
+   * Teil 2") und löst dessen Versand aus; KlickTipp schickt die
+   * Bestätigungsmail, deren Link direkt in den zweiten Parcours führt.
    *
-   * TODO: Die drei Werte unten stammen aus dem Einbettungscode des
-   * KlickTipp-Formulars ("Formular" > "HTML-Code"): action-URL des <form>,
-   * der Wert des versteckten Feldes "apikey" und – falls abweichend – die
-   * Feldnamen für E-Mail und Vorname. Ohne apiKey ist das Formular inaktiv.
+   * Warum über das Original-Formular statt über ein selbst gebautes: So
+   * stimmen Feldnamen und das versteckte Spamschutz-Feld exakt, und das
+   * Captcha-Skript von KlickTipp findet das Formular, das es erwartet.
+   * Abgeschickt wird in ein verstecktes iframe, damit die Seite stehen bleibt
+   * und die eigene Bestätigung erscheinen kann – die Antwort von KlickTipp
+   * lässt sich von dort nicht auslesen (fremde Domain), der Erfolg wird also
+   * angenommen.
    * ------------------------------------------------------------- */
-  const KLICKTIPP = {
-    actionUrl: "https://api.klicktipp.com/api/subscriber/signin",
-    apiKey: "",
-    emailField: "email",
-    firstNameField: "fields[fieldFirstName]",
-  };
+  const KLICKTIPP_FORM_ID = "ktv2-form-358328";
 
   const UNLOCK_STATE_KEY = "hindernisparkour_teil2_angefordert";
   const unlockEl = document.getElementById("unlock");
@@ -1711,30 +1708,29 @@
   }
 
   function sendToKlicktipp(firstName, email) {
-    const form = document.createElement("form");
-    form.method = "post";
-    form.action = KLICKTIPP.actionUrl;
-    form.target = "unlock-sink";
-    form.hidden = true;
-    const addField = (name, value) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
-    };
-    addField("apikey", KLICKTIPP.apiKey);
-    addField(KLICKTIPP.emailField, email);
-    if (KLICKTIPP.firstNameField) addField(KLICKTIPP.firstNameField, firstName);
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
+    const ktForm = document.getElementById(KLICKTIPP_FORM_ID);
+    const ktFirstName = document.getElementById("FormField_FirstName");
+    const ktEmail = document.getElementById("FormField_EmailAddress");
+    if (!ktForm || !ktFirstName || !ktEmail) return false;
+
+    ktFirstName.value = firstName;
+    ktEmail.value = email;
+    ktForm.target = "unlock-sink"; // Antwort landet im versteckten iframe
+
+    // Über den Button bzw. requestSubmit absenden statt über form.submit():
+    // nur so laufen die submit-Handler von KlickTipps Captcha-Skript mit.
+    const ktSubmit = document.getElementById("FormSubmit");
+    if (ktSubmit) {
+      ktSubmit.click();
+    } else if (typeof ktForm.requestSubmit === "function") {
+      ktForm.requestSubmit();
+    } else {
+      ktForm.submit();
+    }
+    return true;
   }
 
-  // Solange kein KlickTipp-Key eingetragen ist, wird der Teil-2-Block gar nicht
-  // erst angezeigt – so kann die Seite schon live sein, ohne dass jemand in ein
-  // Formular tippt, das noch nichts verschicken kann.
-  if (unlockEl && !KLICKTIPP.apiKey) unlockEl.hidden = true;
+  if (unlockEl && !document.getElementById(KLICKTIPP_FORM_ID)) unlockEl.hidden = true;
 
   if (unlockFormEl) {
     unlockFormEl.addEventListener("submit", (e) => {
@@ -1756,13 +1752,12 @@
         showUnlockError("Diese E-Mail-Adresse sieht nicht richtig aus.");
         return;
       }
-      if (!KLICKTIPP.apiKey) {
+      if (!sendToKlicktipp(firstName, email)) {
         showUnlockError("Der Versand ist gerade nicht möglich. Bitte später noch einmal versuchen.");
-        console.warn("KlickTipp ist noch nicht konfiguriert: apiKey in app.js eintragen.");
+        console.warn("Das KlickTipp-Formular fehlt im HTML (" + KLICKTIPP_FORM_ID + ").");
         return;
       }
 
-      sendToKlicktipp(firstName, email);
       rememberUnlockRequested();
       showUnlockDone();
     });
