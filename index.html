@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -153,9 +153,36 @@
 
           <div class="result-actions">
             <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
-            <a href="https://go.excel-flo.de/shortcut-guide-hp/?utm_source=shop&amp;utm_medium=referral&amp;utm_campaign=evergreen&amp;utm_content=startseite" target="_blank" rel="noopener" class="btn-cta btn-cta-secondary" id="btn-guide">Hol dir meinen Shortcut-Guide</a>
-            <p class="guide-subtext">Die wichtigsten Excel-Shortcuts zum Nachschlagen</p>
+
+            <!-- Teil 2 wird per E-Mail freigeschaltet: das Formular traegt den Kontakt
+                 in KlickTipp ein, den Link zum zweiten Parcours verschickt KlickTipp. -->
+            <div class="unlock" id="unlock">
+              <div class="unlock-head">
+                <span class="unlock-badge">TEIL 2</span>
+                <span class="unlock-title">Noch nicht genug? Der zweite Parcours wartet.</span>
+              </div>
+              <p class="unlock-text">8 neue H&uuml;rden, neue Shortcuts. Trag dich ein &ndash; du bekommst den Link per E-Mail.</p>
+
+              <form class="unlock-form" id="unlock-form" novalidate>
+                <div class="unlock-fields">
+                  <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="Vorname" autocomplete="given-name" required>
+                  <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="E-Mail-Adresse" autocomplete="email" required>
+                </div>
+                <button type="submit" class="btn-cta btn-cta-secondary" id="unlock-submit">LINK ZUSCHICKEN</button>
+                <p class="unlock-error" id="unlock-error" hidden></p>
+                <p class="unlock-legal">Du erh&auml;ltst den Link und k&uuml;nftig Excel-Tipps per E-Mail. Abmeldung jederzeit m&ouml;glich. <a href="https://go.excel-flo.de/datenschutz/" target="_blank" rel="noopener">Datenschutz</a></p>
+              </form>
+
+              <div class="unlock-done" id="unlock-done" hidden>
+                <div class="unlock-done-icon">&#128236;</div>
+                <p class="unlock-done-text"><strong>Fast geschafft!</strong> Best&auml;tige kurz die E-Mail in deinem Postfach &ndash; danach kommt der Link zu Teil 2.</p>
+                <p class="unlock-done-hint">Nichts da? Schau im Spam-Ordner nach.</p>
+              </div>
+            </div>
           </div>
+
+          <!-- Nimmt die Antwort von KlickTipp auf, damit die Seite stehen bleibt. -->
+          <iframe name="unlock-sink" id="unlock-sink" title="" aria-hidden="true" tabindex="-1" class="unlock-sink"></iframe>
 
           <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
         </div>
@@ -164,6 +191,6 @@
   </div>
 </section>
 
-<script src="app.js?v=36"></script>
+<script src="app.js?v=39"></script>
 </body>
 </html>

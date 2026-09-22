@@ -1458,6 +1458,7 @@
   }
 
   function showResultScreen(finalSeconds) {
+    refreshUnlockState();
     rankResultEl.hidden = true;
     rankResultEl.textContent = "";
     resultRankEl.textContent = "–";
@@ -1629,6 +1630,148 @@
       startChallenge();
     }
   });
+
+  /* ---------------------------------------------------------------
+   * Teil 2 freischalten – Eintrag in KlickTipp
+   *
+   * GitHub Pages kann selbst keine Mails verschicken: Das Formular wird
+   * deshalb an KlickTipp gesendet, und KlickTipp verschickt die Mail mit
+   * dem Link zum zweiten Parcours (Double-Opt-in). Abgeschickt wird in ein
+   * verstecktes iframe, damit die Seite stehen bleibt und wir unsere eigene
+   * Bestätigung zeigen können – die Antwort von KlickTipp können wir aus
+   * dem iframe nicht lesen (fremde Domain), der Erfolg wird also angenommen.
+   *
+   * TODO: Die drei Werte unten stammen aus dem Einbettungscode des
+   * KlickTipp-Formulars ("Formular" > "HTML-Code"): action-URL des <form>,
+   * der Wert des versteckten Feldes "apikey" und – falls abweichend – die
+   * Feldnamen für E-Mail und Vorname. Ohne apiKey ist das Formular inaktiv.
+   * ------------------------------------------------------------- */
+  const KLICKTIPP = {
+    actionUrl: "https://api.klicktipp.com/api/subscriber/signin",
+    apiKey: "",
+    emailField: "email",
+    firstNameField: "fields[fieldFirstName]",
+  };
+
+  const UNLOCK_STATE_KEY = "hindernisparkour_teil2_angefordert";
+  const unlockEl = document.getElementById("unlock");
+  const unlockFormEl = document.getElementById("unlock-form");
+  const unlockDoneEl = document.getElementById("unlock-done");
+  const unlockErrorEl = document.getElementById("unlock-error");
+  const unlockFirstNameEl = document.getElementById("unlock-firstname");
+  const unlockEmailEl = document.getElementById("unlock-email");
+
+  function hasRequestedUnlock() {
+    try {
+      return localStorage.getItem(UNLOCK_STATE_KEY) === "1";
+    } catch (e) {
+      return false; // z.B. localStorage blockiert
+    }
+  }
+
+  function rememberUnlockRequested() {
+    try {
+      localStorage.setItem(UNLOCK_STATE_KEY, "1");
+    } catch (e) { /* egal, dann eben nur für diesen Aufruf */ }
+  }
+
+  function showUnlockError(message) {
+    unlockErrorEl.textContent = message;
+    unlockErrorEl.hidden = false;
+  }
+
+  function clearUnlockError() {
+    unlockErrorEl.hidden = true;
+    unlockErrorEl.textContent = "";
+    unlockFirstNameEl.classList.remove("is-invalid");
+    unlockEmailEl.classList.remove("is-invalid");
+  }
+
+  // Bewusst großzügig: E-Mail-Adressen sind vielfältiger als jede Regex.
+  // Ernst nimmt die Prüfung KlickTipp, hier geht es nur um offensichtliche Tippfehler.
+  function looksLikeEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+  }
+
+  function showUnlockDone() {
+    unlockFormEl.hidden = true;
+    unlockDoneEl.hidden = false;
+  }
+
+  // Zustand des Formulars beim Öffnen des Ergebnisscreens setzen.
+  function refreshUnlockState() {
+    if (!unlockFormEl) return;
+    clearUnlockError();
+    if (hasRequestedUnlock()) {
+      showUnlockDone();
+    } else {
+      unlockFormEl.hidden = false;
+      unlockDoneEl.hidden = true;
+    }
+  }
+
+  function sendToKlicktipp(firstName, email) {
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = KLICKTIPP.actionUrl;
+    form.target = "unlock-sink";
+    form.hidden = true;
+    const addField = (name, value) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    };
+    addField("apikey", KLICKTIPP.apiKey);
+    addField(KLICKTIPP.emailField, email);
+    if (KLICKTIPP.firstNameField) addField(KLICKTIPP.firstNameField, firstName);
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+  }
+
+  // Solange kein KlickTipp-Key eingetragen ist, wird der Teil-2-Block gar nicht
+  // erst angezeigt – so kann die Seite schon live sein, ohne dass jemand in ein
+  // Formular tippt, das noch nichts verschicken kann.
+  if (unlockEl && !KLICKTIPP.apiKey) unlockEl.hidden = true;
+
+  if (unlockFormEl) {
+    unlockFormEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+      clearUnlockError();
+
+      const firstName = unlockFirstNameEl.value.trim();
+      const email = unlockEmailEl.value.trim();
+
+      if (!firstName) {
+        unlockFirstNameEl.classList.add("is-invalid");
+        unlockFirstNameEl.focus();
+        showUnlockError("Bitte trag deinen Vornamen ein.");
+        return;
+      }
+      if (!looksLikeEmail(email)) {
+        unlockEmailEl.classList.add("is-invalid");
+        unlockEmailEl.focus();
+        showUnlockError("Diese E-Mail-Adresse sieht nicht richtig aus.");
+        return;
+      }
+      if (!KLICKTIPP.apiKey) {
+        showUnlockError("Der Versand ist gerade nicht möglich. Bitte später noch einmal versuchen.");
+        console.warn("KlickTipp ist noch nicht konfiguriert: apiKey in app.js eintragen.");
+        return;
+      }
+
+      sendToKlicktipp(firstName, email);
+      rememberUnlockRequested();
+      showUnlockDone();
+    });
+
+    // Enter im Formular soll abschicken und nicht die Challenge neu starten.
+    unlockFormEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") e.stopPropagation();
+    });
+  }
 
   /* ---------------------------------------------------------------
    * Init
