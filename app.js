@@ -1650,6 +1650,45 @@
    * ------------------------------------------------------------- */
   const KLICKTIPP_FORM_ID = "ktv2-form-358328";
 
+  // Kampagnen-Felder des KlickTipp-Kontos: Feldname im Formular -> Parameter in der Adresse.
+  // Damit steht beim Kontakt, über welche Kampagne er gekommen ist.
+  const KAMPAGNEN_FELDER = {
+    "fields[field231067]": "utm_campaign",
+    "fields[field231068]": "utm_medium",
+    "fields[field231069]": "utm_term",
+    "fields[field231070]": "utm_content",
+    "fields[field231071]": "utm_source",
+    "fields[field231072]": "gclid",
+    "fields[field231073]": "fbclid",
+  };
+  const KAMPAGNE_STORAGE_KEY = "hindernisparkour_kampagne";
+
+  // Die Werte stehen nur beim ersten Aufruf in der Adresse. Bis zum Formular
+  // vergehen aber mehrere Minuten Spielzeit, und ein Neuladen zwischendurch
+  // würde sie verlieren – deshalb werden sie für die Sitzung gemerkt.
+  function kampagnenWerte() {
+    let gemerkt = {};
+    try {
+      gemerkt = JSON.parse(sessionStorage.getItem(KAMPAGNE_STORAGE_KEY) || "{}") || {};
+    } catch (e) { /* z.B. sessionStorage blockiert */ }
+
+    const ausAdresse = new URLSearchParams(window.location.search);
+    let neu = false;
+    Object.values(KAMPAGNEN_FELDER).forEach((parameter) => {
+      const wert = ausAdresse.get(parameter);
+      if (wert) {
+        gemerkt[parameter] = wert.slice(0, 200); // KlickTipp-Felder nicht sprengen
+        neu = true;
+      }
+    });
+    if (neu) {
+      try {
+        sessionStorage.setItem(KAMPAGNE_STORAGE_KEY, JSON.stringify(gemerkt));
+      } catch (e) { /* dann gilt es eben nur für diesen Seitenaufruf */ }
+    }
+    return gemerkt;
+  }
+
   const UNLOCK_STATE_KEY = "hindernisparkour_teil2_angefordert";
   const unlockEl = document.getElementById("unlock");
   const unlockFormEl = document.getElementById("unlock-form");
@@ -1715,6 +1754,13 @@
 
     ktFirstName.value = firstName;
     ktEmail.value = email;
+
+    const kampagne = kampagnenWerte();
+    Object.entries(KAMPAGNEN_FELDER).forEach(([feldName, parameter]) => {
+      const feld = ktForm.querySelector('[name="' + feldName + '"]');
+      if (feld) feld.value = kampagne[parameter] || "";
+    });
+
     ktForm.target = "unlock-sink"; // Antwort landet im versteckten iframe
 
     // Über den Button bzw. requestSubmit absenden statt über form.submit():
@@ -1731,6 +1777,8 @@
   }
 
   if (unlockEl && !document.getElementById(KLICKTIPP_FORM_ID)) unlockEl.hidden = true;
+
+  kampagnenWerte(); // beim Laden merken, solange die Parameter noch in der Adresse stehen
 
   if (unlockFormEl) {
     unlockFormEl.addEventListener("submit", (e) => {
