@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=34">
+<link rel="stylesheet" href="style.css?v=35">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -124,11 +124,13 @@
       <span class="task-wordmark">Excel.Flo</span>
     </div>
     <div class="result-content">
-      <div class="card center result-card">
+      <div class="card center result-card is-compact">
         <div class="result-hero">
           <div class="result-badge" id="result-badge">&#127937;</div>
-          <div class="result-eyebrow">ZIEL ERREICHT &middot; 7/7 H&Uuml;RDEN</div>
-          <h1 id="result-headline">Geschafft!</h1>
+          <div class="result-hero-text">
+            <div class="result-eyebrow">ZIEL ERREICHT &middot; 7/7 H&Uuml;RDEN</div>
+            <h1 id="result-headline">Geschafft!</h1>
+          </div>
           <div class="result-time"><span id="result-time">0.0</span><span class="result-time-unit">s</span></div>
         </div>
 
@@ -148,8 +150,10 @@
             </div>
           </div>
 
-          <div class="result-compare" id="result-compare"></div>
-          <div class="rank-result" id="rank-result" hidden></div>
+          <div class="result-meta">
+            <div class="result-compare" id="result-compare"></div>
+            <div class="rank-result" id="rank-result" hidden></div>
+          </div>
 
           <div class="result-actions">
             <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
@@ -164,17 +168,19 @@
               <p class="unlock-text">8 neue H&uuml;rden, neue Shortcuts. Trag dich ein &ndash; du bekommst den Link per E-Mail.</p>
 
               <form class="unlock-form" id="unlock-form" novalidate>
-                <div class="unlock-fields">
-                  <div class="unlock-field">
-                    <label class="unlock-label" for="unlock-firstname">Vorname</label>
-                    <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="z.&nbsp;B. Flo" autocomplete="given-name" required>
+                <div class="unlock-row">
+                  <div class="unlock-fields">
+                    <div class="unlock-field">
+                      <label class="unlock-label" for="unlock-firstname">Vorname</label>
+                      <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="z.&nbsp;B. Flo" autocomplete="given-name" required>
+                    </div>
+                    <div class="unlock-field">
+                      <label class="unlock-label" for="unlock-email">E-Mail-Adresse</label>
+                      <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="z.&nbsp;B. flo@beispiel.de" autocomplete="email" required>
+                    </div>
                   </div>
-                  <div class="unlock-field">
-                    <label class="unlock-label" for="unlock-email">E-Mail-Adresse</label>
-                    <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="z.&nbsp;B. flo@beispiel.de" autocomplete="email" required>
-                  </div>
+                  <button type="submit" class="btn-cta btn-cta-secondary" id="unlock-submit">LINK ZUSCHICKEN</button>
                 </div>
-                <button type="submit" class="btn-cta btn-cta-secondary" id="unlock-submit">LINK ZUSCHICKEN</button>
                 <p class="unlock-error" id="unlock-error" hidden></p>
                 <p class="unlock-legal">Du erh&auml;ltst den Link und k&uuml;nftig Excel-Tipps per E-Mail. Abmeldung jederzeit m&ouml;glich. <a href="https://go.excel-flo.de/datenschutz/" target="_blank" rel="noopener">Datenschutz</a></p>
               </form>

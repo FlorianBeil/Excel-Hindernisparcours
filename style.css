@@ -1266,6 +1266,80 @@ table.sheet td.cell.range-border {
   .task-pips { width: 100%; }
 }
 
+/* ---------- Kompakte Ergebnis-Karte (Teil 1 mit Teil-2-Formular) ----------
+   Mit dem E-Mail-Formular war die Karte zu hoch fuer einen Blick. Kopf deshalb
+   einzeilig (Badge | Text | Zeit), Vergleich und Rang in einer Zeile,
+   Felder und Button nebeneinander. Teil 2 nutzt weiter die hohe Variante. */
+
+.card.result-card.is-compact { max-width: 640px; }
+
+.is-compact .result-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  text-align: left;
+}
+
+.is-compact .result-badge { width: 46px; height: 46px; margin: 0; font-size: 24px; }
+.is-compact #result-headline { margin: 2px 0 0; font-size: 24px; }
+.is-compact .result-time { margin: 0; font-size: 54px; }
+
+.is-compact .result-body { padding: 14px 24px 16px; }
+.is-compact .result-stats { gap: 10px; margin-bottom: 10px; }
+.is-compact .result-stat { padding: 7px 8px 6px; }
+.is-compact .result-stat-value { font-size: 20px; }
+.is-compact .result-stat-label { margin-top: 2px; font-size: 10.5px; }
+
+.result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 12px;
+}
+
+.is-compact .result-compare { margin: 0; padding: 6px 14px; font-size: 13.5px; }
+.is-compact .rank-result { font-size: 13.5px; }
+
+.is-compact .result-actions { gap: 10px; margin-top: 12px; }
+.is-compact .result-actions .btn-cta { font-size: 16px; padding: 11px 20px 13px; }
+
+.is-compact .unlock { margin-top: 2px; padding: 14px 16px 12px; }
+.is-compact .unlock-text { margin: 6px 0 10px; font-size: 13px; }
+.is-compact .unlock-input { padding: 9px 12px; font-size: 14.5px; }
+
+.unlock-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.unlock-row .unlock-fields { flex: 1; min-width: 0; gap: 10px; margin-bottom: 0; }
+
+/* Button so hoch wie die Eingabefelder, damit die Zeile buendig abschliesst */
+.result-actions .unlock-row .btn-cta {
+  width: auto;
+  flex: none;
+  font-size: 14px;
+  padding: 10px 16px 11px;
+  white-space: nowrap;
+}
+
+.is-compact .unlock-legal { margin-top: 8px; font-size: 11px; }
+
+@media (max-width: 640px) {
+  .is-compact .result-hero { gap: 12px; padding: 14px 16px; }
+  .is-compact .result-badge { display: none; }
+  .is-compact #result-headline { font-size: 20px; }
+  .is-compact .result-eyebrow { font-size: 10px; }
+  .is-compact .result-time { font-size: 40px; }
+  .is-compact .result-body { padding: 14px 16px 16px; }
+  .unlock-row { flex-direction: column; align-items: stretch; }
+  .result-actions .unlock-row .btn-cta { width: 100%; }
+}
+
 /* ---------- Teil 2 freischalten (E-Mail-Eintrag im Ergebnisscreen) ---------- */
 
 .unlock {
