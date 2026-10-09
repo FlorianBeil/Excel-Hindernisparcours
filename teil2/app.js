@@ -1397,6 +1397,20 @@
   const successCheckEl = document.getElementById("success-check");
   const wrongToastEl = document.getElementById("wrong-toast");
   const resultHeadlineEl = document.getElementById("result-headline");
+  const turboZeitEl = document.getElementById("turbo-zeit");
+
+  // Shortcut-Turbo-Video: YouTube wird erst nach dem Klick geladen (vorher keine
+  // Verbindung zu Google - Datenschutz), dann als Hochformat-Short in der Kachel.
+  const turboVideoEl = document.getElementById("turbo-video");
+  document.getElementById("turbo-video-play").addEventListener("click", () => {
+    const player = document.createElement("iframe");
+    player.src = "https://www.youtube-nocookie.com/embed/" + turboVideoEl.dataset.youtube + "?autoplay=1&rel=0";
+    player.allow = "autoplay; encrypted-media; fullscreen";
+    player.allowFullscreen = true;
+    player.title = "Die Smaragd-Orchidee ist verschwunden";
+    turboVideoEl.replaceChildren(player);
+    turboVideoEl.classList.add("is-playing");
+  });
   const resultTimeEl = document.getElementById("result-time");
   const resultCompareEl = document.getElementById("result-compare");
   const confettiLayerEl = document.getElementById("confetti-layer");
@@ -1540,6 +1554,7 @@
     resultRankEl.textContent = "–";
     resultBestEl.textContent = startBestTimeEl.textContent;
     animateResultTime(finalSeconds);
+    turboZeitEl.textContent = finalSeconds.toFixed(1) + "s";
     const diff = Math.abs(finalSeconds - REFERENCE_TIME_SECONDS).toFixed(1);
     resultRefEl.textContent = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
     const beatReference = finalSeconds < REFERENCE_TIME_SECONDS;
