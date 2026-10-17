@@ -4,7 +4,7 @@
   /* ---------------------------------------------------------------
    * Referenzzeit von Excel.Flo (Teil 2)
    * ------------------------------------------------------------- */
-  const REFERENCE_TIME_SECONDS = 35.0;
+  const REFERENCE_TIME_SECONDS = 20.4;
 
   /* ---------------------------------------------------------------
    * Ranking (Supabase, dasselbe Projekt wie das Übungsportal) – komplett
