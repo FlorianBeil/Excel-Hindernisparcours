@@ -545,3 +545,11 @@ table.sheet td.cell.zone-green {
 @media (max-width: 640px) {
   .turbo-preisbox .turbo-btn { width: 100%; justify-content: center; }
 }
+
+/* Aktive Zelle in der dunkelgrünen Überschrift: Der normale grüne Rahmen geht auf dem
+   dunklen Grün unter – hier deshalb hellere Füllung mit weißem Innenrahmen
+   (v. a. im Finale beim Filter, wo man in der Überschrift „Status“ stehen muss). */
+table.sheet td.cell.head-green.active {
+  background: #3f9150;
+  box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px #1d4524;
+}
