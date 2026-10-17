@@ -257,7 +257,7 @@ table.sheet td.cell.zone-green {
    Gleicher Block wie auf der Abschlussseite des Uebungsportals Light
    (excel-uebungsportal-light/assets/seite/seite.css, .bonus-angebot). */
 
-.card.result-card.has-turbo { max-width: 760px; }
+.card.result-card.has-turbo { max-width: 880px; } /* breit genug, dass der Button im Preis-Kasten neben dem Preis steht */
 
 .turbo {
   --turbo-dunkel: #0B3D22;
@@ -484,4 +484,64 @@ table.sheet td.cell.zone-green {
   .turbo:has(.turbo-video.is-playing) { grid-template-columns: minmax(0, 1fr); }
   .turbo-video.is-playing { justify-self: center; }
   .turbo h2 { font-size: 19px; }
+}
+
+/* Preis-Kasten im Turbo-Block (Portal-Preis 49 € statt 69 €) – wie .bonus-preisbox im
+   Uebungsportal Light; ersetzt die fruehere Tasten-Zeile und den einzelnen Button */
+.turbo-preisbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-top: 4px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+}
+
+.turbo-preisbox-preis p { margin: 0; }
+
+.turbo-preisbox-etikett {
+  font-family: var(--font-jetbrains-mono, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #F2C94C;
+}
+
+.turbo-preisbox-zeile {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 2px 0 1px !important;
+}
+
+.turbo-preisbox-zeile strong {
+  font-family: var(--font-space-grotesk);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.turbo-preisbox-zeile span {
+  font-family: var(--font-inter);
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.turbo-preisbox-hinweis {
+  font-family: var(--font-inter);
+  font-size: 12.5px;
+  color: var(--turbo-akzent);
+}
+
+.turbo-preisbox .turbo-btn { flex: none; }
+
+@media (max-width: 640px) {
+  .turbo-preisbox .turbo-btn { width: 100%; justify-content: center; }
 }
