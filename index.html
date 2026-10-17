@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=35">
+<link rel="stylesheet" href="style.css?v=36">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -156,33 +156,27 @@
           </div>
 
           <div class="result-actions">
-            <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
-
             <!-- Teil 2 wird per E-Mail freigeschaltet: das Formular traegt den Kontakt
                  in KlickTipp ein, den Link zum zweiten Parcours verschickt KlickTipp. -->
             <div class="unlock" id="unlock">
-              <div class="unlock-head">
-                <span class="unlock-badge">TEIL 2</span>
-                <span class="unlock-title">Noch nicht genug? Der zweite Parcours wartet.</span>
-              </div>
-              <p class="unlock-text">8 neue H&uuml;rden, neue Shortcuts. Trag dich ein &ndash; du bekommst den Link per E-Mail.</p>
+              <span class="unlock-badge">Teil 2 freischalten</span>
+              <h2 class="unlock-title">Bereit f&uuml;r die n&auml;chste Runde?</h2>
+              <p class="unlock-text">8 neue H&uuml;rden: Zellen l&ouml;schen, Datum eintragen, Spaltenbreite anpassen, Filter setzen &ndash; alles ohne Maus.</p>
 
               <form class="unlock-form" id="unlock-form" novalidate>
-                <div class="unlock-row">
-                  <div class="unlock-fields">
-                    <div class="unlock-field">
-                      <label class="unlock-label" for="unlock-firstname">Vorname</label>
-                      <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="z.&nbsp;B. Flo" autocomplete="given-name" required>
-                    </div>
-                    <div class="unlock-field">
-                      <label class="unlock-label" for="unlock-email">E-Mail-Adresse</label>
-                      <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="z.&nbsp;B. flo@beispiel.de" autocomplete="email" required>
-                    </div>
+                <div class="unlock-fields">
+                  <div class="unlock-field">
+                    <label class="unlock-label" for="unlock-firstname">Vorname</label>
+                    <input type="text" id="unlock-firstname" name="firstname" class="unlock-input" placeholder="Vorname" autocomplete="given-name" required>
                   </div>
-                  <button type="submit" class="btn-cta btn-cta-secondary" id="unlock-submit">LINK ZUSCHICKEN</button>
+                  <div class="unlock-field">
+                    <label class="unlock-label" for="unlock-email">E-Mail-Adresse</label>
+                    <input type="email" id="unlock-email" name="email" class="unlock-input" placeholder="E-Mail-Adresse" autocomplete="email" required>
+                  </div>
                 </div>
+                <button type="submit" class="unlock-submit" id="unlock-submit">Link zu Teil 2 zuschicken &rarr;</button>
                 <p class="unlock-error" id="unlock-error" hidden></p>
-                <p class="unlock-legal">Du erh&auml;ltst den Link und k&uuml;nftig Excel-Tipps per E-Mail. Abmeldung jederzeit m&ouml;glich. <a href="https://go.excel-flo.de/datenschutz/" target="_blank" rel="noopener">Datenschutz</a></p>
+                <p class="unlock-legal">Den Link bekommst du per Mail, dazu k&uuml;nftig Excel-Tipps. Abmeldung jederzeit. <a href="https://go.excel-flo.de/datenschutz/" target="_blank" rel="noopener">Datenschutz</a></p>
               </form>
 
               <div class="unlock-done" id="unlock-done" hidden>
@@ -205,7 +199,7 @@
             <div id="form-358328-wrapper"><form id="ktv2-form-358328" accept-charset="UTF-8" method="post" action="https://app.klicktipp.com/api/subscriber/signin.html" ><input type="hidden" id="FormField_ApiKey" name="apikey" value="8chxzrlerz8zf8a5" /><input type="hidden" id="FormField_Digit" name="fields[fieldDigit]" value="" /><div class="ktv2-form-element"><label for="FormField_FirstName">Vorname: </label><br /><input type="text" id="FormField_FirstName" name="fields[fieldFirstName]" value="" tabindex="-1" /></div><div class="ktv2-form-element"><label for="FormField_EmailAddress">Ihre E-Mail-Adresse: </label><br /><input type="text" id="FormField_EmailAddress" name="email" value="" size="40" tabindex="-1" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231067" name="fields[field231067]" value="" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231068" name="fields[field231068]" value="" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231069" name="fields[field231069]" value="" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231070" name="fields[field231070]" value="" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231071" name="fields[field231071]" value="" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231072" name="fields[field231072]" value="" /></div><div class="ktv2-form-element"><input type="hidden" id="FormField_231073" name="fields[field231073]" value="" /></div><br /><div><input type="submit" id="FormSubmit" name="FormSubmit" value="Ihr Button-Text" tabindex="-1"/></div></form></div>
           </div>
 
-          <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
+          <p class="cta-share"><button id="btn-retry" type="button" class="retry-link">&#8635; Nochmal versuchen</button> &middot; Screenshot posten mit <strong>#ExcelFloParcours</strong></p>
         </div>
       </div>
     </div>
