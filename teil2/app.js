@@ -87,6 +87,20 @@
       });
   }
 
+  // Nutzungs-Ereignis für die Auswertung „Auswertung Stufen Hindernisparcours“ (Tabelle
+  // public.events, portal 'hindernisparcours'). Die Geräte-ID ist dieselbe wie fürs Ranking
+  // und in Teil 1 und 2 gleich (gleiche Adresse) – so lässt sich zählen, wer nach Teil 1
+  // auch Teil 2 spielt. Best effort: Fehler werden verschluckt.
+  function trackEvent(event, detail) {
+    const client = getSupabaseClient();
+    const anonId = getAnonId();
+    if (!client || !anonId) return;
+    client
+      .from("events")
+      .insert({ portal: "hindernisparcours", exercise_id: "teil2", event, detail: detail || {}, session_id: anonId })
+      .then(() => {}, () => {});
+  }
+
   /* ---------------------------------------------------------------
    * Plattform-Erkennung: Strg (Windows) vs. Cmd (Mac)
    * ------------------------------------------------------------- */
@@ -1544,6 +1558,7 @@
     challengeActive = false;
     stopTimer();
     const finalSeconds = (performance.now() - timerStartMs) / 1000;
+    trackEvent("challenge_finish", { sekunden: Math.round(finalSeconds * 10) / 10 });
     progressLabelEl.textContent = `Aufgabe ${TASKS.length}/${TASKS.length}`;
     showResultScreen(finalSeconds);
   }
@@ -1697,6 +1712,7 @@
     taskCtx = TASKS[0].init();
     challengeActive = true;
     locked = false;
+    trackEvent("challenge_start");
     showScreen("challenge");
     renderCurrentTask();
     startTimer();
