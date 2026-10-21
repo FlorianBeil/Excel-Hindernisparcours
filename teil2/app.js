@@ -1416,7 +1416,12 @@
   // Shortcut-Turbo-Video: YouTube wird erst nach dem Klick geladen (vorher keine
   // Verbindung zu Google - Datenschutz), dann als Hochformat-Short in der Kachel.
   const turboVideoEl = document.getElementById("turbo-video");
+  // Klick auf den Shortcut-Turbo-Button für die Auswertung zählen
+  document.querySelectorAll(".turbo-btn").forEach((btn) =>
+    btn.addEventListener("click", () => trackEvent("turbo_click"))
+  );
   document.getElementById("turbo-video-play").addEventListener("click", () => {
+    trackEvent("turbo_video");
     const player = document.createElement("iframe");
     player.src = "https://www.youtube-nocookie.com/embed/" + turboVideoEl.dataset.youtube + "?autoplay=1&rel=0";
     player.allow = "autoplay; encrypted-media; fullscreen";

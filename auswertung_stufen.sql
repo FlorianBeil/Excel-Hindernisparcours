@@ -9,6 +9,8 @@
 --   challenge_start    Parcours gestartet (auch jeder Neustart)
 --   challenge_finish   Parcours beendet            detail.sekunden
 --   unlock_submit      Teil-2-Anmeldung abgeschickt (nur Teil 1)
+--   turbo_video        Video im Shortcut-Turbo-Block gestartet (nur Teil 2)
+--   turbo_click        Klick auf den Shortcut-Turbo-Button (nur Teil 2, seit 2026-10-21)
 -- Gezählt wird je Gerät: wer zehnmal spielt, zählt pro Woche einmal.
 
 -- 1. 'hindernisparcours' als erlaubten Bereich ergänzen (die übrigen müssen drinbleiben)
@@ -29,6 +31,8 @@ with schritte as (
       when exercise_id = 'teil1' and event = 'unlock_submit'    then 3
       when exercise_id = 'teil2' and event = 'challenge_start'  then 4
       when exercise_id = 'teil2' and event = 'challenge_finish' then 5
+      when exercise_id = 'teil2' and event = 'turbo_video'      then 6
+      when exercise_id = 'teil2' and event = 'turbo_click'      then 7
     end as schritt
   from public.events
   where portal = 'hindernisparcours'
@@ -40,7 +44,9 @@ zahlen as (
     count(distinct session_id) filter (where schritt = 2) as s1_ende,
     count(distinct session_id) filter (where schritt = 3) as anmeldung,
     count(distinct session_id) filter (where schritt = 4) as s2_start,
-    count(distinct session_id) filter (where schritt = 5) as s2_ende
+    count(distinct session_id) filter (where schritt = 5) as s2_ende,
+    count(distinct session_id) filter (where schritt = 6) as video,
+    count(distinct session_id) filter (where schritt = 7) as turbo
   from schritte
   where schritt is not null
   group by rollup (woche)
@@ -55,7 +61,10 @@ select
   round(100.0 * s1_ende / nullif(s1_start, 0), 1)   as "Stufe 1 beendet in %",
   round(100.0 * anmeldung / nullif(s1_ende, 0), 1)  as "Anmeldung in % der Beendeten",
   round(100.0 * s2_start / nullif(anmeldung, 0), 1) as "Stufe 2 gestartet in % der Anmeldungen",
-  round(100.0 * s2_ende / nullif(s2_start, 0), 1)   as "Stufe 2 beendet in %"
+  round(100.0 * s2_ende / nullif(s2_start, 0), 1)   as "Stufe 2 beendet in %",
+  video     as "Video gestartet",
+  turbo     as "Klick Shortcut-Turbo",
+  round(100.0 * turbo / nullif(s2_ende, 0), 1)      as "Klick in % der Beendeten"
 from zahlen
 order by woche is not null, woche desc;
 
