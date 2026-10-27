@@ -88,9 +88,9 @@
   }
 
   // Nutzungs-Ereignis für die Auswertung „Auswertung Stufen Hindernisparcours“ (Tabelle
-  // public.events, portal 'hindernisparcours'). Die Geräte-ID ist dieselbe wie fürs Ranking
-  // und in Teil 1 und 2 gleich (gleiche Adresse) – so lässt sich zählen, wer nach Teil 1
-  // auch Teil 2 spielt. Best effort: Fehler werden verschluckt.
+  // public.events, portal 'hindernisparcours'). Die Geräte-ID ist dieselbe wie fürs Ranking.
+  // exercise_id bleibt 'teil1' (wie vor dem Umzug nach /parcours/), damit alte und neue
+  // Zahlen zusammenpassen. Best effort: Fehler werden verschluckt.
   function trackEvent(event, detail) {
     const client = getSupabaseClient();
     const anonId = getAnonId();
@@ -1343,6 +1343,25 @@
   const successCheckEl = document.getElementById("success-check");
   const wrongToastEl = document.getElementById("wrong-toast");
   const resultHeadlineEl = document.getElementById("result-headline");
+  const turboZeitEl = document.getElementById("turbo-zeit");
+
+  // Shortcut-Turbo-Video: YouTube wird erst nach dem Klick geladen (vorher keine
+  // Verbindung zu Google - Datenschutz), dann als Hochformat-Short in der Kachel.
+  const turboVideoEl = document.getElementById("turbo-video");
+  // Klick auf den Shortcut-Turbo-Button für die Auswertung zählen
+  document.querySelectorAll(".turbo-btn").forEach((btn) =>
+    btn.addEventListener("click", () => trackEvent("turbo_click"))
+  );
+  document.getElementById("turbo-video-play").addEventListener("click", () => {
+    trackEvent("turbo_video");
+    const player = document.createElement("iframe");
+    player.src = "https://www.youtube-nocookie.com/embed/" + turboVideoEl.dataset.youtube + "?autoplay=1&rel=0";
+    player.allow = "autoplay; encrypted-media; fullscreen";
+    player.allowFullscreen = true;
+    player.title = "Die Smaragd-Orchidee ist verschwunden";
+    turboVideoEl.replaceChildren(player);
+    turboVideoEl.classList.add("is-playing");
+  });
   const resultTimeEl = document.getElementById("result-time");
   const resultCompareEl = document.getElementById("result-compare");
   const confettiLayerEl = document.getElementById("confetti-layer");
@@ -1473,12 +1492,12 @@
   }
 
   function showResultScreen(finalSeconds) {
-    refreshUnlockState();
     rankResultEl.hidden = true;
     rankResultEl.textContent = "";
     resultRankEl.textContent = "–";
     resultBestEl.textContent = startBestTimeEl.textContent;
     animateResultTime(finalSeconds);
+    turboZeitEl.textContent = finalSeconds.toFixed(1) + "s";
     const diff = Math.abs(finalSeconds - REFERENCE_TIME_SECONDS).toFixed(1);
     resultRefEl.textContent = REFERENCE_TIME_SECONDS.toFixed(1) + "s";
     const beatReference = finalSeconds < REFERENCE_TIME_SECONDS;
@@ -1646,192 +1665,6 @@
       startChallenge();
     }
   });
-
-  /* ---------------------------------------------------------------
-   * Teil 2 freischalten – Eintrag in KlickTipp
-   *
-   * GitHub Pages bzw. Vercel liefern nur statische Dateien aus, verschicken
-   * also selbst keine Mails. Das sichtbare Formular befüllt deshalb das
-   * unveränderte KlickTipp-Formular im HTML (Opt-In-Prozess "Hindernisparcours
-   * Teil 2") und löst dessen Versand aus; KlickTipp schickt die
-   * Bestätigungsmail, deren Link direkt in den zweiten Parcours führt.
-   *
-   * Warum über das Original-Formular statt über ein selbst gebautes: So
-   * stimmen Feldnamen und das versteckte Spamschutz-Feld exakt, und das
-   * Captcha-Skript von KlickTipp findet das Formular, das es erwartet.
-   * Abgeschickt wird in ein verstecktes iframe, damit die Seite stehen bleibt
-   * und die eigene Bestätigung erscheinen kann – die Antwort von KlickTipp
-   * lässt sich von dort nicht auslesen (fremde Domain), der Erfolg wird also
-   * angenommen.
-   * ------------------------------------------------------------- */
-  const KLICKTIPP_FORM_ID = "ktv2-form-358328";
-
-  // Kampagnen-Felder des KlickTipp-Kontos: Feldname im Formular -> Parameter in der Adresse.
-  // Damit steht beim Kontakt, über welche Kampagne er gekommen ist.
-  const KAMPAGNEN_FELDER = {
-    "fields[field231067]": "utm_campaign",
-    "fields[field231068]": "utm_medium",
-    "fields[field231069]": "utm_term",
-    "fields[field231070]": "utm_content",
-    "fields[field231071]": "utm_source",
-    "fields[field231072]": "gclid",
-    "fields[field231073]": "fbclid",
-  };
-  const KAMPAGNE_STORAGE_KEY = "hindernisparkour_kampagne";
-
-  // Die Werte stehen nur beim ersten Aufruf in der Adresse. Bis zum Formular
-  // vergehen aber mehrere Minuten Spielzeit, und ein Neuladen zwischendurch
-  // würde sie verlieren – deshalb werden sie für die Sitzung gemerkt.
-  function kampagnenWerte() {
-    let gemerkt = {};
-    try {
-      gemerkt = JSON.parse(sessionStorage.getItem(KAMPAGNE_STORAGE_KEY) || "{}") || {};
-    } catch (e) { /* z.B. sessionStorage blockiert */ }
-
-    const ausAdresse = new URLSearchParams(window.location.search);
-    let neu = false;
-    Object.values(KAMPAGNEN_FELDER).forEach((parameter) => {
-      const wert = ausAdresse.get(parameter);
-      if (wert) {
-        gemerkt[parameter] = wert.slice(0, 200); // KlickTipp-Felder nicht sprengen
-        neu = true;
-      }
-    });
-    if (neu) {
-      try {
-        sessionStorage.setItem(KAMPAGNE_STORAGE_KEY, JSON.stringify(gemerkt));
-      } catch (e) { /* dann gilt es eben nur für diesen Seitenaufruf */ }
-    }
-    return gemerkt;
-  }
-
-  const UNLOCK_STATE_KEY = "hindernisparkour_teil2_angefordert";
-  const unlockEl = document.getElementById("unlock");
-  const unlockFormEl = document.getElementById("unlock-form");
-  const unlockDoneEl = document.getElementById("unlock-done");
-  const unlockErrorEl = document.getElementById("unlock-error");
-  const unlockFirstNameEl = document.getElementById("unlock-firstname");
-  const unlockEmailEl = document.getElementById("unlock-email");
-
-  function hasRequestedUnlock() {
-    try {
-      return localStorage.getItem(UNLOCK_STATE_KEY) === "1";
-    } catch (e) {
-      return false; // z.B. localStorage blockiert
-    }
-  }
-
-  function rememberUnlockRequested() {
-    try {
-      localStorage.setItem(UNLOCK_STATE_KEY, "1");
-    } catch (e) { /* egal, dann eben nur für diesen Aufruf */ }
-  }
-
-  function showUnlockError(message) {
-    unlockErrorEl.textContent = message;
-    unlockErrorEl.hidden = false;
-  }
-
-  function clearUnlockError() {
-    unlockErrorEl.hidden = true;
-    unlockErrorEl.textContent = "";
-    unlockFirstNameEl.classList.remove("is-invalid");
-    unlockEmailEl.classList.remove("is-invalid");
-  }
-
-  // Bewusst großzügig: E-Mail-Adressen sind vielfältiger als jede Regex.
-  // Ernst nimmt die Prüfung KlickTipp, hier geht es nur um offensichtliche Tippfehler.
-  function looksLikeEmail(value) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
-  }
-
-  function showUnlockDone() {
-    unlockFormEl.hidden = true;
-    unlockDoneEl.hidden = false;
-  }
-
-  // Zustand des Formulars beim Öffnen des Ergebnisscreens setzen.
-  function refreshUnlockState() {
-    if (!unlockFormEl) return;
-    clearUnlockError();
-    if (hasRequestedUnlock()) {
-      showUnlockDone();
-    } else {
-      unlockFormEl.hidden = false;
-      unlockDoneEl.hidden = true;
-    }
-  }
-
-  function sendToKlicktipp(firstName, email) {
-    const ktForm = document.getElementById(KLICKTIPP_FORM_ID);
-    const ktFirstName = document.getElementById("FormField_FirstName");
-    const ktEmail = document.getElementById("FormField_EmailAddress");
-    if (!ktForm || !ktFirstName || !ktEmail) return false;
-
-    ktFirstName.value = firstName;
-    ktEmail.value = email;
-
-    const kampagne = kampagnenWerte();
-    Object.entries(KAMPAGNEN_FELDER).forEach(([feldName, parameter]) => {
-      const feld = ktForm.querySelector('[name="' + feldName + '"]');
-      if (feld) feld.value = kampagne[parameter] || "";
-    });
-
-    ktForm.target = "unlock-sink"; // Antwort landet im versteckten iframe
-
-    // Über den Button bzw. requestSubmit absenden statt über form.submit():
-    // nur so laufen die submit-Handler von KlickTipps Captcha-Skript mit.
-    const ktSubmit = document.getElementById("FormSubmit");
-    if (ktSubmit) {
-      ktSubmit.click();
-    } else if (typeof ktForm.requestSubmit === "function") {
-      ktForm.requestSubmit();
-    } else {
-      ktForm.submit();
-    }
-    return true;
-  }
-
-  if (unlockEl && !document.getElementById(KLICKTIPP_FORM_ID)) unlockEl.hidden = true;
-
-  kampagnenWerte(); // beim Laden merken, solange die Parameter noch in der Adresse stehen
-
-  if (unlockFormEl) {
-    unlockFormEl.addEventListener("submit", (e) => {
-      e.preventDefault();
-      clearUnlockError();
-
-      const firstName = unlockFirstNameEl.value.trim();
-      const email = unlockEmailEl.value.trim();
-
-      if (!firstName) {
-        unlockFirstNameEl.classList.add("is-invalid");
-        unlockFirstNameEl.focus();
-        showUnlockError("Bitte trag deinen Vornamen ein.");
-        return;
-      }
-      if (!looksLikeEmail(email)) {
-        unlockEmailEl.classList.add("is-invalid");
-        unlockEmailEl.focus();
-        showUnlockError("Diese E-Mail-Adresse sieht nicht richtig aus.");
-        return;
-      }
-      if (!sendToKlicktipp(firstName, email)) {
-        showUnlockError("Der Versand ist gerade nicht möglich. Bitte später noch einmal versuchen.");
-        console.warn("Das KlickTipp-Formular fehlt im HTML (" + KLICKTIPP_FORM_ID + ").");
-        return;
-      }
-
-      rememberUnlockRequested();
-      trackEvent("unlock_submit");
-      showUnlockDone();
-    });
-
-    // Enter im Formular soll abschicken und nicht die Challenge neu starten.
-    unlockFormEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") e.stopPropagation();
-    });
-  }
 
   /* ---------------------------------------------------------------
    * Init

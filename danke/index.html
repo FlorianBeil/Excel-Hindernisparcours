@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Fast geschafft &ndash; Excel Hindernisparcours</title>
+<link rel="icon" type="image/svg+xml" href="../logo-dark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css?v=37">
+</head>
+<body>
+
+<!-- Danke-Seite nach dem Absenden der Anmeldung. Den Link zum Parcours gibt es
+     erst mit der Bestaetigung der E-Mail (Double-Opt-in in KlickTipp). -->
+<main class="start-container">
+  <div class="start-logo-row">
+    <img src="../logo-dark.svg" alt="" class="start-logo">
+    <span class="start-wordmark">Excel.Flo</span>
+  </div>
+
+  <div class="start-hero danke-hero">
+    <div class="start-eyebrow"><span class="live-dot"></span>FAST GESCHAFFT</div>
+    <h1 class="danke-title" id="danke-title">Danke!</h1>
+    <p class="start-subline">Dein Startlink ist unterwegs. Best&auml;tige nur noch kurz deine E-Mail-Adresse &ndash; direkt danach landest du im Parcours.</p>
+
+    <ol class="danke-steps">
+      <li class="danke-step">
+        <span class="danke-step-icon" aria-hidden="true">&#128236;</span>
+        <span class="danke-step-text"><strong>Postfach &ouml;ffnen</strong>Die Mail kommt von Excel.Flo.</span>
+      </li>
+      <li class="danke-step">
+        <span class="danke-step-icon" aria-hidden="true">&#9989;</span>
+        <span class="danke-step-text"><strong>Best&auml;tigungslink klicken</strong>Damit ist deine Anmeldung fertig.</span>
+      </li>
+      <li class="danke-step">
+        <span class="danke-step-icon" aria-hidden="true">&#127937;</span>
+        <span class="danke-step-text"><strong>Am Computer losrennen</strong>7 H&uuml;rden, nur Tastatur &ndash; schlag Flos Zeit!</span>
+      </li>
+    </ol>
+
+    <p class="danke-hint">Nichts angekommen? Schau im Spam- oder Werbung-Ordner nach. Vertippt? <a href="../">Nochmal eintragen</a></p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <span>Excel.Flo</span>
+  <a href="https://go.excel-flo.de/impressum/" target="_blank" rel="noopener">Impressum</a>
+  <a href="https://go.excel-flo.de/datenschutz/" target="_blank" rel="noopener">Datenschutz</a>
+</footer>
+
+<script>
+  // Persoenliche Begruessung: Die Anmeldeseite merkt sich den Vornamen fuer diese Sitzung.
+  try {
+    var vorname = sessionStorage.getItem("hindernisparkour_vorname");
+    if (vorname) document.getElementById("danke-title").textContent = "Danke, " + vorname + "!";
+  } catch (e) { /* dann bleibt es beim einfachen "Danke!" */ }
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel Hindernisparkour – Excel.Flo</title>
+<link rel="icon" type="image/svg+xml" href="../logo-dark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@700&family=Space+Grotesk:wght@700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css?v=37">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header class="top-bar">
+  <img src="../logo-dark.svg" alt="" class="top-bar-logo">
+  <span class="top-bar-brand">Excel.Flo</span>
+</header>
+
+<!-- Touch-only Hinweisbildschirm -->
+<section id="screen-touch" class="screen">
+  <div class="card center">
+    <div class="big-icon">⌨️</div>
+    <h1>Nur am Desktop verfügbar</h1>
+    <p>Diese Challenge funktioniert nur am Desktop oder Laptop mit einer physischen Tastatur – Excel-Shortcuts lassen sich auf einem Touch-Gerät nicht ausführen.</p>
+    <p class="muted">Ruf diese Seite auf einem Computer erneut auf, um den Parkour zu starten.</p>
+  </div>
+</section>
+
+<!-- Startbildschirm -->
+<section id="screen-start" class="screen">
+  <div class="start-container">
+    <div class="start-logo-row">
+      <img src="../logo-dark.svg" alt="" class="start-logo">
+      <span class="start-wordmark">Excel.Flo</span>
+    </div>
+
+    <div class="start-hero">
+      <div class="start-eyebrow"><span class="live-dot"></span>SPEEDRUN &middot; NUR TASTATUR</div>
+      <h1 class="start-title"><span class="title-key">Excel</span><span class="accent">Hindernisparcours</span></h1>
+      <div class="start-cta-block">
+        <button id="btn-start" type="button" class="btn-cta">CHALLENGE STARTEN</button>
+        <span class="start-cta-hint">oder <span class="keycap">Enter</span> dr&uuml;cken</span>
+      </div>
+
+      <div class="start-stats">
+        <div class="start-stats-cell">
+          <div class="start-stats-value">7</div>
+          <div class="start-stats-label">H&Uuml;RDEN</div>
+        </div>
+        <div class="start-stats-cell">
+          <div class="start-stats-value" id="start-best-time">&ndash;</div>
+          <div class="start-stats-label">BESTZEIT</div>
+        </div>
+        <div class="start-stats-cell">
+          <div class="start-stats-value" id="start-participants">&ndash;</div>
+          <div class="start-stats-label">TEILNEHMER</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="start-footnote">
+      <span class="keycap">Strg</span>
+      <span class="start-mod-sep">/</span>
+      <span class="keycap">Cmd</span>
+      <span>wird automatisch erkannt</span>
+    </div>
+  </div>
+</section>
+
+<!-- Challenge-Bildschirm -->
+<section id="screen-challenge" class="screen">
+  <div class="task-container">
+    <div class="task-logo-row">
+      <img src="../logo-dark.svg" alt="" class="task-logo">
+      <span class="task-wordmark">Excel.Flo</span>
+    </div>
+
+    <div class="task-content">
+      <div class="task-frame" id="task-frame">
+        <div class="task-hud">
+          <div class="task-hud-left">
+            <span class="task-hud-label" id="progress-label">Aufgabe 1/7</span>
+            <div class="task-pips" id="task-pips"></div>
+          </div>
+          <button id="btn-reset" class="task-reset-btn" type="button" title="Zur&uuml;ck zum Start">&#8634; Neu starten</button>
+        </div>
+
+        <div class="task-row">
+          <span class="task-instruction" id="task-instruction">Anweisung</span>
+          <div class="task-timer"><span id="timer-display">0.00</span><span class="task-timer-unit">s</span></div>
+        </div>
+
+        <div class="grid-window">
+          <div class="ribbon" id="ribbon-container"></div>
+          <div class="formula-bar">
+            <div class="namebox" id="namebox">A1</div>
+            <div class="formulabar" id="formulabar"><span id="formulabar-text"></span></div>
+          </div>
+          <div class="grid-scroll">
+            <div id="grid-container"></div>
+          </div>
+        </div>
+
+        <div class="task-badges" id="task-badges"></div>
+        <div class="task-hint" id="task-hint"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback-layer" id="feedback-layer">
+    <div class="success-check" id="success-check">✓</div>
+    <div class="wrong-toast" id="wrong-toast">Falscher Shortcut, versuch's nochmal</div>
+  </div>
+</section>
+
+<!-- Ergebnisbildschirm -->
+<section id="screen-result" class="screen">
+  <div id="confetti-layer"></div>
+  <div class="result-container">
+    <div class="result-logo-row">
+      <img src="../logo-dark.svg" alt="" class="task-logo">
+      <span class="task-wordmark">Excel.Flo</span>
+    </div>
+    <div class="result-content">
+      <div class="card center result-card is-compact has-turbo">
+        <div class="result-hero">
+          <div class="result-badge" id="result-badge">&#127937;</div>
+          <div class="result-hero-text">
+            <div class="result-eyebrow">ZIEL ERREICHT &middot; 7/7 H&Uuml;RDEN</div>
+            <h1 id="result-headline">Geschafft!</h1>
+          </div>
+          <div class="result-time"><span id="result-time">0.0</span><span class="result-time-unit">s</span></div>
+        </div>
+
+        <div class="result-body">
+          <div class="result-stats">
+            <div class="result-stat is-highlight">
+              <div class="result-stat-value" id="result-rank">&ndash;</div>
+              <div class="result-stat-label">PLATZ</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-value" id="result-best">&ndash;</div>
+              <div class="result-stat-label">BESTZEIT</div>
+            </div>
+            <div class="result-stat">
+              <div class="result-stat-value" id="result-ref">&ndash;</div>
+              <div class="result-stat-label">FLOS ZEIT</div>
+            </div>
+          </div>
+
+          <div class="result-meta">
+            <div class="result-compare" id="result-compare"></div>
+            <div class="rank-result" id="rank-result" hidden></div>
+          </div>
+
+          <div class="result-actions">
+            <button id="btn-retry" type="button" class="btn-cta">NOCHMAL VERSUCHEN</button>
+
+            <!-- Angebot Shortcut-Turbo: gleicher Block wie im Uebungsportal Light
+                 (excel-uebungsportal-light, konfiguration.json -> miniKurs). -->
+            <section class="turbo">
+              <div class="turbo-video" id="turbo-video" data-youtube="KvTYQMoijV4">
+                <img class="turbo-video-bild" src="../florian.webp" alt="">
+                <button type="button" class="turbo-video-play" id="turbo-video-play" aria-label="Video abspielen: Die Smaragd-Orchidee ist verschwunden">
+                  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <div class="turbo-video-text">
+                  <p class="turbo-video-label">Der Fall &middot; 0:30</p>
+                  <p class="turbo-video-titel">Die Smaragd-Orchidee ist verschwunden</p>
+                </div>
+              </div>
+              <div class="turbo-inhalt">
+                <p class="turbo-marke">Dein n&auml;chster Schritt</p>
+                <h2>Arbeite deutlich schneller &ndash; mit meinem Shortcut-Turbo</h2>
+                <p class="turbo-zeit">
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                  <span>Du hast <strong id="turbo-zeit">0.0s</strong> gebraucht. Mit dem Shortcut-Turbo geht&rsquo;s noch schneller.</span>
+                </p>
+                <ul class="turbo-merkmale">
+                  <li><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 4.5v15l12-7.5z"/></svg><span>17 Aufgaben</span></li>
+                  <li><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg><span>1 Excel-Krimi</span></li>
+                  <li><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>49 Missionen</span></li>
+                </ul>
+                <div class="turbo-preisbox">
+                  <div class="turbo-preisbox-preis">
+                    <p class="turbo-preisbox-etikett">Dein Vorteilspreis &middot; 20 &euro; g&uuml;nstiger</p>
+                    <p class="turbo-preisbox-zeile"><strong>49 &euro;</strong><span>statt regul&auml;r 69 &euro;</span></p>
+                    <p class="turbo-preisbox-hinweis">Als Dankesch&ouml;n f&uuml;rs Mitmachen am Parcours</p>
+                  </div>
+                  <a class="turbo-btn" href="https://myablefy.com/s/excel.flo/excel-shortcut-turbo/payment?coupon=Turbo-Parcours&amp;utm_source=hindernisparcours&amp;utm_medium=funnel&amp;utm_campaign=launch-shortcut-turbo-202610&amp;utm_content=upsell-parcours" target="_blank" rel="noopener">Jetzt f&uuml;r 49 &euro; starten &rarr;</a>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <p class="cta-share">&#128248; Screenshot machen und mit <strong>#ExcelFloParcours</strong> posten!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <span>Excel.Flo</span>
+  <a href="https://go.excel-flo.de/impressum/" target="_blank" rel="noopener">Impressum</a>
+  <a href="https://go.excel-flo.de/datenschutz/" target="_blank" rel="noopener">Datenschutz</a>
+</footer>
+
+<script src="app.js?v=43"></script>
+</body>
+</html>
